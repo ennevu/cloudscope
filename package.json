@@ -1,0 +1,48 @@
+{
+  "name": "cloudscope",
+  "version": "0.1.0",
+  "description": "A Node.js library to detect whether an IP address belongs to a cloud provider. Supports AWS, Azure, GCP, Oracle, IBM, DigitalOcean, Linode, Exoscale, and Vultr. Fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 addresses efficiently.",
+  "keywords": [
+    "ip",
+    "ip-address",
+    "ip-ranges",
+    "cidr",
+    "subnet",
+    "network",
+    "cloud",
+    "cloud-provider",
+    "aws",
+    "amazon",
+    "azure",
+    "microsoft",
+    "gcp",
+    "google",
+    "oracle",
+    "ibm",
+    "digitalocean",
+    "linode",
+    "exoscale",
+    "vultr",
+    "cloudflare",
+    "hosting",
+    "datacenter",
+    "geolocation",
+    "lookup",
+    "whois"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-personal:ennevu/cloudscope.git"
+  },
+  "license": "MIT",
+  "author": "Nicolò Vattai",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "types": "src/types.d.ts",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2",
+    "papaparse": "^5.5.3",
+    "ipaddr.js": "^2.1.0"
+  }
+}
