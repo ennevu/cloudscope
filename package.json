@@ -32,7 +32,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com-personal:ennevu/cloudscope.git"
+    "url": "https://github.com/ennevu/cloudscope.git"
   },
   "license": "MIT",
   "author": "Nicolò Vattai",
