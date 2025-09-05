@@ -13,7 +13,7 @@ It fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 address
 * Detect if an IP belongs to a **cloud provider**
 * Supports **IPv4** and **IPv6**
 * Providers supported:
-  AWS, Azure, Google Cloud, Oracle, IBM, DigitalOcean, Linode, Exoscale, Vultr
+  AWS, Azure, Google Cloud, Oracle, IBM, DigitalOcean, Linode, Exoscale, Vultr, Scaleway, NIFCloud
 * Cached loading with configurable TTL
 * Filter by provider, service, or region
 
