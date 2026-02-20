@@ -62,7 +62,7 @@ const { load, isIp, getData, refresh } = require('cloudscope');
   }
 
   // 3. Restrict by provider
-  const awsCheck = await isIp('52.95.110.1', { provider: 'Amazon' });
+  const awsCheck = isIp('52.95.110.1', { provider: 'Amazon' });
   console.log(awsCheck);
 
   // 4. Get dataset summary
