@@ -12,6 +12,10 @@ const getExoscale = require('./providers/exoscale')
 const getVultr = require('./providers/vultr')
 const getNifcloud = require('./providers/nifcloud')
 const getScaleway = require('./providers/scaleway')
+const getCloudflare = require('./providers/cloudflare.js')
+const getAliyun = require('./providers/aliyun.js')
+const { getGeofeed, gFeeds} = require('./providers/geofeeds.js')
+
 
 
 let _store = {
@@ -28,7 +32,69 @@ let _store = {
  */
 async function load(opts = {}) {
   const {
-    providers = ['azure','aws','gcp','ibm','oracle','digitalocean','linode','exoscale','vultr', 'nifcloud', 'scaleway'],
+    providers = [
+      'azure',
+      'aws',
+      'gcp',
+      'ibm',
+      'oracle',
+      'digitalocean',
+      'linode',
+      'exoscale',
+      'vultr',
+      'nifcloud',
+      'scaleway',
+      'cloudflare',
+      'aliyun',
+      'elastx',
+      'aruba',
+      'hetzner',
+      'eurohoster',
+      'hostealo',
+      'zappiehost',
+      'hosthatch',
+      'pumpcloud',
+      'kaopucloud',
+      'cloudcomtr',
+      'crowncloud',
+      'mikicloud',
+      'gthost',
+      'lowhosting',
+      'mathost',
+      'mchost',
+      'mclouds',
+      'halocloud',
+      'rarecloud',
+      'jinxcloud',
+      'xtom',
+      'akile',
+      'vecloud',
+      'internetone',
+      'hostbilby',
+      'hostglobal',
+      'kamatera',
+      'gcore',
+      'contabo',
+      'timeweb',
+      'seasoncloud',
+      'datalix',
+      'c1vhosting',
+      '3hcloud',
+      'cloudzy',
+      'cloud225',
+      'cloudnet',
+      'sejacloud',
+      'letscloud',
+      'maikiwi',
+      'serverside',
+      'mycloud',
+      'mymisaka',
+      'railway',
+      'csti',
+      'eonscloud',
+      'seeweb',
+      'axera',
+    ],
     ttlMs = _store.ttlMs,
     force = false,
   } = opts
@@ -39,6 +105,11 @@ async function load(opts = {}) {
   }
 
   const tasks = []
+  for (const id of providers) {
+    if (gFeeds.has(id)) {
+      tasks.push(getGeofeed(id))
+    }
+  }
   if (providers.includes('azure')) tasks.push(getAzure())
   if (providers.includes('aws')) tasks.push(getAws())
   if (providers.includes('gcp')) tasks.push(getGcp())
@@ -50,8 +121,9 @@ async function load(opts = {}) {
   if (providers.includes('vultr')) tasks.push(getVultr())
   if (providers.includes('nifcloud')) tasks.push(getNifcloud())
   if (providers.includes('scaleway')) tasks.push(getScaleway())
-
-  const results = await Promise.allSettled(tasks);
+  if (providers.includes('cloudflare')) tasks.push(getCloudflare())
+  if (providers.includes('aliyun')) tasks.push(getAliyun())
+  const results = await Promise.allSettled(tasks)
 
   const raw = results
     .filter(r => r.status === 'fulfilled')
@@ -82,9 +154,9 @@ async function load(opts = {}) {
  * Check whether an IP belongs to any known cloud provider CIDR range.
  * Automatically calls `load()` once if the cache is empty.
  */
-async function isIp(ip, options = {}) {
+function isIp(ip, options = {}) {
   if (!Net.isIP(ip)) return { match: false, reason: 'invalid_ip' }
-  if (!_store.loadedAt) await load()
+  if (!_store.loadedAt) return {match: false, reason: 'data_not_loaded'}
 
   const { provider, service, regionId } = options
 
@@ -133,4 +205,8 @@ async function refresh() {
   return load({ force: true })
 }
 
-module.exports = { load, isIp, getData, refresh }
+function exportData() {
+  return _store.records
+}
+
+module.exports = { load, isIp, getData, refresh, exportData }

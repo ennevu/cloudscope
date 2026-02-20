@@ -1,10 +1,9 @@
-const axios = require('axios')
 const papa = require('papaparse')
 module.exports = async function getLinode() {
   const ips = new Map()
   try {
     // Get the JSON data of IP ranges
-    let csv = (await axios.get('https://geoip.linode.com', { maxRedirects: 10 })).data
+    let csv = (await (await fetch('https://geoip.linode.com', { maxRedirects: 10 })).text())
     const rows = papa.parse(csv).data.slice(3)
     for (const entry of rows) {
       if (ips.has(entry[3])) {

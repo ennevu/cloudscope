@@ -1,4 +1,3 @@
-const axios = require('axios')
 const cheerio = require('cheerio')
 
 module.exports = async function getScaleway() {
@@ -8,7 +7,7 @@ module.exports = async function getScaleway() {
 	const ips = new Map([
 		['globalnull', {
 			cloud: 'Scaleway',
-			region: null,
+			region: 'Global',
 			regionId: 'global',
 			service: null,
 			addressesv4: [],
@@ -17,7 +16,7 @@ module.exports = async function getScaleway() {
 	])
 
 	try {
-		const page = (await axios.get('https://www.scaleway.com/en/docs/account/reference-content/scaleway-network-information/', { maxRedirects: 10 })).data
+		const page = (await (await fetch('https://www.scaleway.com/en/docs/account/reference-content/scaleway-network-information/', { maxRedirects: 10 })).text())
 		const $ = cheerio.load(page)
 
 		/** ---------- IP ranges used by Scaleway (global IPv4/IPv6) ---------- */

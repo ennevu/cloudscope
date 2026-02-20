@@ -14,7 +14,60 @@ export interface NormalizedRecord {
     | 'Digital Ocean'
     | 'Linode'
     | 'Exoscale'
-    | 'Vultr';
+    | 'Vultr'
+    | 'Nifcloud'
+    | 'Scaleway'
+    | 'Cloudflare'
+    | 'Aliyun'
+    | 'Elastx'
+    | 'Aruba'
+    | 'Hetzner'
+    | 'Eurohoster'
+    | 'Hostealo'
+    | 'Zappiehost'
+    | 'Hosthatch'
+    | 'Pumpcloud'
+    | 'Kaopucloud'
+    | 'Cloudcomtr'
+    | 'Crowncloud'
+    | 'Mikicloud'
+    | 'Gthost'
+    | 'Lowhosting'
+    | 'Mathost'
+    | 'Mchost'
+    | 'Mclouds'
+    | 'Halocloud'
+    | 'Rarecloud'
+    | 'Jinxcloud'
+    | 'Xtom'
+    | 'Akile'
+    | 'Vecloud'
+    | 'Internetone'
+    | 'Hostbilby'
+    | 'Hostglobal'
+    | 'Kamatera'
+    | 'Gcore'
+    | 'Contabo'
+    | 'Timeweb'
+    | 'Seasoncloud'
+    | 'Datalix'
+    | 'C1vhosting'
+    | '3hcloud'
+    | 'Cloudzy'
+    | 'Cloud225'
+    | 'Cloudnet'
+    | 'Sejacloud'
+    | 'Letscloud'
+    | 'Maikiwi'
+    | 'Serverside'
+    | 'Mycloud'
+    | 'Mymisaka'
+    | 'Railway'
+    | 'Csti'
+    | 'Eonscloud'
+    | 'Seeweb'
+    | 'Axera'
+
 
   /** Cloud region identifier (e.g., "eu-west-1", "global") */
   regionId: string;
@@ -47,6 +100,58 @@ export interface LoadOptions {
     | 'linode'
     | 'exoscale'
     | 'vultr'
+    | 'nifcloud'
+    | 'scaleway'
+    | 'cloudflare'
+    | 'aliyun'
+    | 'elastx'
+    | 'aruba'
+    | 'hetzner'
+    | 'eurohoster'
+    | 'hostealo'
+    | 'zappiehost'
+    | 'hosthatch'
+    | 'pumpcloud'
+    | 'kaopucloud'
+    | 'cloudcomtr'
+    | 'crowncloud'
+    | 'mikicloud'
+    | 'gthost'
+    | 'lowhosting'
+    | 'mathost'
+    | 'mchost'
+    | 'mclouds'
+    | 'halocloud'
+    | 'rarecloud'
+    | 'jinxcloud'
+    | 'xtom'
+    | 'akile'
+    | 'vecloud'
+    | 'internetone'
+    | 'hostbilby'
+    | 'hostglobal'
+    | 'kamatera'
+    | 'gcore'
+    | 'contabo'
+    | 'timeweb'
+    | 'seasoncloud'
+    | 'datalix'
+    | 'c1vhosting'
+    | '3hcloud'
+    | 'cloudzy'
+    | 'cloud225'
+    | 'cloudnet'
+    | 'sejacloud'
+    | 'letscloud'
+    | 'maikiwi'
+    | 'serverside'
+    | 'mycloud'
+    | 'mymisaka'
+    | 'railway'
+    | 'csti'
+    | 'eonscloud'
+    | 'seeweb'
+    | 'axera'
   >;
 
   /** Cache TTL in milliseconds (default: 6h) */
@@ -78,7 +183,7 @@ export interface IsIpResult {
   match: boolean;
 
   /** Reason if not matched */
-  reason?: 'invalid_ip' | 'provider_not_loaded';
+  reason?: 'invalid_ip' | 'provider_not_loaded' | 'data_not_loaded';
 
   /** IP version of the match */
   version?: 'ipv4' | 'ipv6';
@@ -121,8 +226,10 @@ export interface DataSummary {
  */
 export function load(opts?: LoadOptions): Promise<{ loadedAt: number; count: number }>;
 
-export function isIp(ip: string, options?: IsIpOptions): Promise<IsIpResult>;
+export function isIp(ip: string, options?: IsIpOptions): IsIpResult;
 
 export function getData(): DataSummary;
 
 export function refresh(): Promise<{ loadedAt: number; count: number }>;
+
+export function exportData(): NormalizedRecord[];

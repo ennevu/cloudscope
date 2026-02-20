@@ -1,9 +1,8 @@
-const axios = require('axios')
 module.exports = async function getOracle() {
     const ips = new Map()
   try {
     // Get the JSON data of IP ranges
-    const json = (await axios.get('https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json', { maxRedirects: 10 })).data
+    const json = await (await fetch('https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json', { maxRedirects: 10 })).json()
     for (const entry of json?.regions ?? []) {
       const region = entry.region.split("-")[1].charAt(0).toUpperCase() + String(entry.region.split("-")[1]).slice(1)
       const services = [...new Set(entry.cidrs.flatMap(cidr => cidr.tags))]

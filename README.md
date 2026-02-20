@@ -12,10 +12,23 @@ It fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 address
 
 * Detect if an IP belongs to a **cloud provider**
 * Supports **IPv4** and **IPv6**
-* Providers supported:
-  AWS, Azure, Google Cloud, Oracle, IBM, DigitalOcean, Linode, Exoscale, Vultr, Scaleway, NIFCloud
 * Cached loading with configurable TTL
 * Filter by provider, service, or region
+
+## ☁️ Supported Providers
+
+| Country/Region      | Providers                                                                                   |
+|---------------------|---------------------------------------------------------------------------------------------|
+| USA                 | AWS, Azure, Google Cloud, IBM, DigitalOcean, Linode, Oracle, Vultr, Cloudflare, HostHatch, GTHost, Kamatera, Contabo, Railway, HostGlobal, HostBilby, MyCloud, MyMisaka, Serverside, Cloud225, LetsCloud, Cloudzy, SeasonCloud, RareCloud, HaloCloud, Mathost, MCHost, MClouds, PumpCloud, LowHosting, Hostealo, ZappieHost, CrownCloud, CloudNet, EonsCloud, Axera |
+| Asia                | Aliyun (China), KaopuCloud (China), JinXCloud (China),  NIFCloud (Japan), Mikicloud (Japan)                                                              |
+| Europe              | Scaleway (France), Exoscale (Switzerland), Hetzner (Germany), Aruba (Italy), EuroHoster (Bulgaria), Seeweb (Italy), Timeweb (Russia), InternetOne (Germany), Gcore (Luxembourg), Datalix (Netherlands), 3HCloud (Russia), C1VHosting (Netherlands), Maikiwi (Netherlands), SejaCloud (Portugal), CloudComTR (Turkey), Akile (France), VeCloud (France), Hostealo (Spain), HostGlobal (Germany), MCHost (Russia), Mathost (Russia), MClouds (Russia), SeasonCloud (Russia), RareCloud (Russia), HaloCloud (Russia), CloudNet (Germany), EonsCloud (Germany), Axera (France), CSTI (Switzerland)|
+| Australia           | HostBilby                                                                                   |
+| Brazil              | LetsCloud                                                                                   |
+| India               | HostGlobal                                                                                  |
+| Africa              | Cloud225 (Ivory Coast)                                                                      |
+
+*Note: Some providers operate globally or in multiple regions. This table lists their primary country or region of origin where applicable.*
+
 
 ---
 
@@ -57,6 +70,9 @@ const { load, isIp, getData, refresh } = require('cloudscope');
 
   // 5. Force refresh
   await refresh();
+
+  // 6. Export the Data
+  console.log(exportData());
 })();
 ```
 
@@ -140,17 +156,32 @@ Forces a reload of all provider ranges, ignoring cache.
 { loadedAt: number, count: number }
 ```
 
----
+### `exportData(): NormalizedRecord[]`
+Returns the normalized in-memory dataset
+
+**Returns:**
+
+```js
+[
+  { provider: string,
+    regionId: string,
+    region: string,
+    service: string | null
+    addressesv4: [string],
+    addressev6: [string]
+   }
+]
+```
 
 ## 💡 Use cases
 
-* 🔍 **Security logging**: enrich logs with provider info
-* 🛡️ **Firewall / WAF rules**: detect and allow/deny traffic from clouds
-* 📊 **Analytics**: categorize requests by hosting provider
-* 🌍 **Geolocation**: improve IP intelligence with cloud-awareness
+* **Security logging**: enrich logs with provider info
+* **Firewall / WAF rules**: detect and allow/deny traffic from clouds
+* **Analytics**: categorize requests by hosting provider
+* **Geolocation**: improve IP intelligence with cloud-awareness
 
 ---
 
-## 📝 License
+## License
 
 MIT © Nicolò Vattai

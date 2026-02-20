@@ -1,10 +1,9 @@
-const axios = require('axios')
 const papa = require('papaparse')
 module.exports = async function getDigitalOcean() {
   const ips = new Map()
   try {
     // Get the JSON data of IP ranges
-    const csv = (await axios.get('https://digitalocean.com/geo/google.csv', { maxRedirects: 10 })).data
+    const csv = (await (await fetch('https://digitalocean.com/geo/google.csv', { maxRedirects: 10 })).text())
     const rows = papa.parse(csv).data
     for (const entry of rows) {
       if (ips.has(entry[3])) {

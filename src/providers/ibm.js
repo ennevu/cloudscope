@@ -1,8 +1,7 @@
-const axios = require('axios')
 module.exports = async function getIBM() {
   const ips = new Map()
   try {
-    const json = (await axios.get("https://raw.githubusercontent.com/dprosper/cidr-calculator/main/data/datacenters.new.json", { maxRedirects: 10 })).data
+    const json = await (await fetch("https://raw.githubusercontent.com/dprosper/cidr-calculator/main/data/datacenters.new.json", { maxRedirects: 10 })).json()
     for (const entry of json?.data_centers ?? []) {
       const addressesv4 = []
       const addressesv6 = []

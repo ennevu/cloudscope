@@ -1,8 +1,7 @@
-const axios = require('axios')
-module.exports = async function getVultr() {
+  module.exports = async function getVultr() {
   const ips = new Map()
   try {
-    const json = (await axios.get("https://geofeed.constant.com/?json", { maxRedirects: 10 })).data
+    const json = await (await fetch("https://geofeed.constant.com/?json", { maxRedirects: 10 })).json()
     for (const entry of json?.subnets ?? []) {
       if (ips.has(entry.region)) {
         entry.ip_prefix.includes('.') ? ips.get(entry.region).addressesv4.push(entry.ip_prefix) : null
