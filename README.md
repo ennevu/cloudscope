@@ -168,7 +168,7 @@ Returns the normalized in-memory dataset
     region: string,
     service: string | null
     addressesv4: [string],
-    addressev6: [string]
+    addressesv6: [string]
    }
 ]
 ```
