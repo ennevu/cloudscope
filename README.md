@@ -166,7 +166,7 @@ Returns the normalized in-memory dataset
   { provider: string,
     regionId: string,
     region: string,
-    service: string | null
+    service: string | null,
     addressesv4: [string],
     addressesv6: [string]
    }
