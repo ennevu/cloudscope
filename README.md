@@ -52,7 +52,7 @@ const { load, isIp, getData, refresh } = require('cloudscope');
   await load({ ttlMs: 1000 * 60 * 60 * 12 }); // cache = 12h
 
   // 2. Check an IP
-  const result = await isIp('52.95.110.1');
+  const result = isIp('52.95.110.1');
 
   if (result.match) {
     console.log(`✅ Cloud IP detected!`);
