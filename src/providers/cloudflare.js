@@ -14,6 +14,7 @@ module.exports = async function getCloudflare() {
         ips.set('global', {
           cloud: 'Cloudflare',
           region: 'Global',
+          country: null,
           regionId:'global',
           service: null,
           addressesv4: entry.includes('.') ? [entry] : [],

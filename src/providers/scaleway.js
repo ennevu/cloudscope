@@ -8,6 +8,7 @@ module.exports = async function getScaleway() {
 		['globalnull', {
 			cloud: 'Scaleway',
 			region: 'Global',
+			country: null,
 			regionId: 'global',
 			service: null,
 			addressesv4: [],

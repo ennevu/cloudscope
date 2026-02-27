@@ -1,3 +1,15 @@
+## [0.2.1] - 2026-02-20
+
+### Fixed
+ - Fixed parsing in MyCloud where geofeed data was not commented
+ - Bug in AWS where IPv6 first entries where added with region null
+ - Removed Eons Cloud (geofeed not reachable anymore)
+ - Patched Aruba Cloud (geofeed mismatch between city and country)
+
+### Added
+ - Filtering by ISO3166 country codes is now possible
+ - Auto testing workflows
+
 ## [0.2.0] - 2026-02-20
 
 ### Added

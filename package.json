@@ -34,6 +34,9 @@
     "type": "git",
     "url": "https://github.com/ennevu/cloudscope.git"
   },
+  "scripts": {
+    "test": "node --test"
+  },
   "license": "MIT",
   "author": "Nicolò Vattai",
   "type": "commonjs",
@@ -42,6 +45,7 @@
   "dependencies": {
     "cheerio": "^1.1.2",
     "ipaddr.js": "^2.1.0",
+    "iso-3166-1": "^2.1.1",
     "papaparse": "^5.5.3"
   }
 }

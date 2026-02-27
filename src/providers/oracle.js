@@ -1,3 +1,4 @@
+
 module.exports = async function getOracle() {
     const ips = new Map()
   try {

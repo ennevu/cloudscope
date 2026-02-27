@@ -14,7 +14,9 @@ const getNifcloud = require('./providers/nifcloud')
 const getScaleway = require('./providers/scaleway')
 const getCloudflare = require('./providers/cloudflare.js')
 const getAliyun = require('./providers/aliyun.js')
+const getAruba = require('./providers/aruba.js')
 const { getGeofeed, gFeeds} = require('./providers/geofeeds.js')
+const { get } = require('node:http')
 
 
 
@@ -46,8 +48,8 @@ async function load(opts = {}) {
       'scaleway',
       'cloudflare',
       'aliyun',
-      'elastx',
       'aruba',
+      'elastx',
       'hetzner',
       'eurohoster',
       'hostealo',
@@ -123,6 +125,7 @@ async function load(opts = {}) {
   if (providers.includes('scaleway')) tasks.push(getScaleway())
   if (providers.includes('cloudflare')) tasks.push(getCloudflare())
   if (providers.includes('aliyun')) tasks.push(getAliyun())
+  if (providers.includes('aruba')) tasks.push(getAruba())
   const results = await Promise.allSettled(tasks)
 
   const raw = results
@@ -152,13 +155,12 @@ async function load(opts = {}) {
 
 /**
  * Check whether an IP belongs to any known cloud provider CIDR range.
- * Automatically calls `load()` once if the cache is empty.
  */
 function isIp(ip, options = {}) {
   if (!Net.isIP(ip)) return { match: false, reason: 'invalid_ip' }
   if (!_store.loadedAt) return {match: false, reason: 'data_not_loaded'}
 
-  const { provider, service, regionId } = options
+  const { provider, service, regionId, country } = options
 
   let candidates = _store.records
   if (provider) {
@@ -169,16 +171,16 @@ function isIp(ip, options = {}) {
 
   if (service) candidates = candidates.filter(r => r.service === service)
   if (regionId) candidates = candidates.filter(r => r.regionId === regionId)
-
+  if (country) candidates = candidates.filter(r => Array.isArray(country) ? country.includes(r.country) :  r.country === country)
   for (const rec of candidates) {
     for (const cidr of rec.addressesv4) {
       if (ipInCidr(ip, cidr)) {
-        return { match: true, version: 'ipv4', provider: rec.provider, regionId: rec.regionId, region: rec.region, service: rec.service, cidr };
+        return { match: true, version: 'ipv4', provider: rec.provider, country: rec.country, regionId: rec.regionId,  region: rec.region, service: rec.service, cidr };
       }
     }
     for (const cidr of rec.addressesv6) {
       if (ipInCidr(ip, cidr)) {
-        return { match: true, version: 'ipv6', provider: rec.provider, regionId: rec.regionId, region: rec.region, service: rec.service, cidr };
+        return { match: true, version: 'ipv6', provider: rec.provider, country: rec.country, regionId: rec.regionId, region: rec.region, service: rec.service, cidr };
       }
     }
   }

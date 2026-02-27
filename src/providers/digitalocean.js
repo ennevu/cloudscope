@@ -1,4 +1,5 @@
 const papa = require('papaparse')
+const iso = require('iso-3166-1')
 module.exports = async function getDigitalOcean() {
   const ips = new Map()
   try {
@@ -12,6 +13,7 @@ module.exports = async function getDigitalOcean() {
         ips.set(entry[3], {
           cloud: 'Digital Ocean',
           region: entry[3],
+          country: entry[1],
           regionId: entry[2],
           service: null,
           addressesv4: entry[0].includes('.') ? [entry[0]] : [],

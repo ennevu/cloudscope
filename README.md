@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/cloudscope.svg)](https://www.npmjs.com/package/cloudscope)
 [![license](https://img.shields.io/npm/l/cloudscope.svg)](./LICENSE)
+[![CI](https://github.com/ennevu/cloudscope/actions/workflows/ci.yml/badge.svg)](https://github.com/ennevu/cloudscope/actions/workflows/ci.yml)
 
 **cloudscope** is a Node.js library to detect whether an IP address belongs to a major cloud provider.
 It fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 addresses efficiently.
@@ -13,7 +14,7 @@ It fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 address
 * Detect if an IP belongs to a **cloud provider**
 * Supports **IPv4** and **IPv6**
 * Cached loading with configurable TTL
-* Filter by provider, service, or region
+* Filter by provider, service, region or ISO3166 country code
 
 ## ☁️ Supported Providers
 
@@ -45,14 +46,14 @@ yarn add cloudscope
 ## 📖 Usage
 
 ```js
-const { load, isIp, getData, refresh } = require('cloudscope');
+const { load, isIp, getData, refresh, exportData } = require('cloudscope');
 
 (async () => {
   // 1. Load data from providers (cached in memory)
-  await load({ ttlMs: 1000 * 60 * 60 * 12 }); // cache = 12h
+  await load({ ttlMs: 1000 * 60 * 60 * 12 , providers: ['aws']}); // cache = 12h
 
   // 2. Check an IP
-  const result = isIp('52.95.110.1');
+  const result = isIp('15.230.39.1');
 
   if (result.match) {
     console.log(`✅ Cloud IP detected!`);
@@ -62,8 +63,20 @@ const { load, isIp, getData, refresh } = require('cloudscope');
   }
 
   // 3. Restrict by provider
-  const awsCheck = isIp('52.95.110.1', { provider: 'Amazon' });
+  const awsCheck = isIp('15.230.39.1', { provider: 'Amazon' });
   console.log(awsCheck);
+
+  // 4. Restrict by single country
+  const usCheck = isIp('15.230.39.1', { country:'US'});
+  console.log(usCheck);
+
+  // 5. Restrict by multiple countries
+   const euCheck = isIp('15.230.39.1', { country:['IT', 'DE', 'FR', 'GB']})
+   console.log(euCheck);
+
+  // 6. Or a combination of the above
+  const specialCheck = isIp('15.230.39.1', {country:'US', provider: 'Amazon', regionId:'us-east-2'})
+  console.log(specialCheck);
 
   // 4. Get dataset summary
   console.log(getData());
@@ -72,7 +85,7 @@ const { load, isIp, getData, refresh } = require('cloudscope');
   await refresh();
 
   // 6. Export the Data
-  console.log(exportData());
+  const db = exportData();
 })();
 ```
 
@@ -99,7 +112,7 @@ Uses an in-memory cache with configurable TTL.
 
 ---
 
-### `await isIp(ip: string, options?: IsIpOptions)`
+### `isIp(ip: string, options?: IsIpOptions)`
 
 Checks whether an IPv4 or IPv6 address belongs to a known cloud provider range.
 
@@ -111,6 +124,7 @@ Checks whether an IPv4 or IPv6 address belongs to a known cloud provider range.
   * `provider` → restrict to a specific provider (e.g., "Amazon", "Microsoft")
   * `service` → restrict to a specific service (if available)
   * `regionId` → restrict to a specific region identifier (e.g., "eu-west-1")
+  * `country` → restrict to a specific country or a list of countries (e.g., "US" or ["US", "IT", "DE"])
 
 **Returns (`IsIpResult`):**
 
@@ -120,6 +134,7 @@ Checks whether an IPv4 or IPv6 address belongs to a known cloud provider range.
   reason?: 'invalid_ip' | 'provider_not_loaded',
   version?: 'ipv4' | 'ipv6',
   provider?: string,
+  country?: string|null,
   regionId?: string,
   region?: string|null,
   service?: string|null,
@@ -166,6 +181,7 @@ Returns the normalized in-memory dataset
   { provider: string,
     regionId: string,
     region: string,
+    country: string | null,
     service: string | null,
     addressesv4: [string],
     addressesv6: [string]

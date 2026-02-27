@@ -173,6 +173,9 @@ export interface IsIpOptions {
 
   /** Restrict to a specific region identifier */
   regionId?: string;
+
+  /** Restrict to a specific country code (ISO 3166-1 alpha-2) */
+  country?: string | string[];
 }
 
 /**
@@ -190,6 +193,9 @@ export interface IsIpResult {
 
   /** Provider that matched */
   provider?: NormalizedRecord['provider'];
+
+  /** Country code (ISO 3166-1 alpha-2), when available */
+  country?: string;
 
   /** Region identifier */
   regionId?: string;

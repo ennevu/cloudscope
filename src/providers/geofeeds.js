@@ -1,7 +1,6 @@
 const papa = require('papaparse')
 const gFeeds = new Map([
   ['elastx', { url: 'https://data-source.elastx.cloud/geofeed.csv', name: 'Elastx' }],
-  ['aruba', { url: 'https://geoloc.aruba.it/geo.csv', name: 'Aruba Cloud' }],
   ['hetzner', { url: 'https://www.hetzner.com/geofeed.csv', name: 'Hetzner' }],
   ['eurohoster', { url: 'https://eurohoster.org/geofeeds.csv', name: 'EuroHoster' }],
   ['hostealo', { url: 'https://hostealo.es/geofeed.csv', name: 'Hostealo' }],
@@ -45,7 +44,6 @@ const gFeeds = new Map([
   ['mymisaka', { url: 'https://www.mymisaka.net/feed.csv', name: 'MyMisaka' }],
   ['railway', { url: 'https://geofeed.railway.com', name: 'Railway' }],
   ['csti', { url: 'https://csti.ch/geofeed.csv', name: 'CSTI' }],
-  ['eonscloud', { url: 'https://eons.cloud/ip-geo-feed/data.csv', name: 'Eons Cloud' }],
   ['seeweb', { url: 'https://www.as12637.net/geofeed.csv', name: 'SeeWeb' }],
   ['axera', { url: 'https://as13097.net/geofeed/geofeed.csv', name: 'Axera' }]
 ])
@@ -56,13 +54,15 @@ async function getGeofeed(id) {
     const csv = await (await fetch(url, { maxRedirects: 10 })).text()
     const rows = papa.parse(csv, { comments: '#' }).data
     for (const entry of rows) {
+      if (entry[0] === 'ip_range' || entry[0] === 'network' || entry[0] === 'prefix') continue
       if (ips.has(entry[3]) && entry[3]) {
         entry[0].includes('.') ? ips.get(entry[3]).addressesv4.push(entry[0]) : ips.get(entry[3]).addressesv6.push(entry[0])
       } else if (entry[3]) {
         ips.set(entry[3], {
           cloud: name,
-          region: entry[3],
-          regionId: entry[2] ?? null,
+          region: entry[3].toLowerCase() === 'anycast' ? 'Global' : entry[3],
+          country: entry[1].toLowerCase() === 'anycast' ? null : entry[1],
+          regionId: entry[2].toLowerCase() === 'anycast' ? 'global' : entry[2],
           service: null,
           addressesv4: entry[0].includes('.') ? [entry[0]] : [],
           addressesv6: entry[0].includes(':') ? [entry[0]] : []

@@ -12,6 +12,7 @@ module.exports = async function getLinode() {
         ips.set(entry[3], {
           cloud: 'Linode',
           region: entry[3],
+          country: entry[1],
           regionId: entry[2],
           service: null,
           addressesv4: entry[0].includes('.') ? [entry[0]] : [],

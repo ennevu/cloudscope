@@ -1,13 +1,13 @@
 const regionMap = new Map([
-    ['de-fra-1','Frankfurt'],
-    ['de-muc-1','Munich'],
-    ['bg-sof-1','Sofia'],
-    ['at-vie-1','Vienna'],
-    ['at-vie-2','Vienna'],
-    ['ch-gva-2','Geneva'],
-    ['ch-dk-1','Zurich'],
-    ['ch-dk-2','Zurich'],
-    ['hr-zag-1','Zagreb']
+    ['de-fra-1',{region:'Frankfurt', country: 'DE'}],
+    ['de-muc-1',{region:'Munich', country: 'DE'}],
+    ['bg-sof-1',{region:'Sofia', country: 'BG'}],
+    ['at-vie-1',{region:'Vienna', country: 'AT'}],
+    ['at-vie-2',{region:'Vienna', country: 'AT'}],
+    ['ch-gva-2',{region:'Geneva', country: 'CH'}],
+    ['ch-dk-1',{region:'Zurich', country: 'CH'}],
+    ['ch-dk-2',{region:'Zurich', country: 'CH'}],
+    ['hr-zag-1',{region:'Zagreb', country: 'HR'}]
 ])
 
 module.exports = async function getExoscale() {
@@ -22,7 +22,8 @@ module.exports = async function getExoscale() {
         } else {
             ips.set(entry.zone, {
                 cloud: 'Exoscale',
-                region: regionMap.get(entry.zone) || null,
+                region: regionMap.get(entry.zone)?.region || null,
+                country: regionMap.get(entry.zone)?.country || null,
                 regionId: entry.zone,
                 service: null,
                 addressesv4: entry.IPv4Prefix ? [entry.IPv4Prefix] : [],

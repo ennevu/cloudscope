@@ -12,6 +12,7 @@ function normalizeRecord(entry) {
 
   return {
     provider,
+    country: entry.country ?? null,
     regionId: entry.regionId ?? 'global',
     region: entry.region ?? 'Global',
     service: entry.service ?? null,

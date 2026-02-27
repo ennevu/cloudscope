@@ -10,6 +10,7 @@
         ips.set(entry.region, {
           cloud: 'Vultr',
           region: entry.city,
+          country: entry.alpha2code,
           regionId: entry.region,
           service: null,
           addressesv4: entry.ip_prefix.includes('.') ? [entry.ip_prefix] : [],

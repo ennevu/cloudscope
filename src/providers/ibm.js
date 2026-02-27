@@ -1,3 +1,4 @@
+const iso = require('iso-3166-1')
 module.exports = async function getIBM() {
   const ips = new Map()
   try {
@@ -5,6 +6,7 @@ module.exports = async function getIBM() {
     for (const entry of json?.data_centers ?? []) {
       const addressesv4 = []
       const addressesv6 = []
+      const country = entry.country === 'ENG' ? 'GB' : iso.whereAlpha3(entry.country)?.alpha2 || null
       for (const net of ["front_end_public_network", "load_balancers_ips"]) {
         for (const blocks of entry[net] ?? []) {
           for (const cidr of blocks?.cidr_blocks ?? []) {
@@ -17,6 +19,7 @@ module.exports = async function getIBM() {
         ips.set(entry.key, {
           cloud: 'IBM',
           region: entry.city,
+          country: country,
           regionId: entry.key,
           service: null,
           addressesv4,

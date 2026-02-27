@@ -1,4 +1,10 @@
 const cheerio = require('cheerio')
+const iso = require('iso-3166-1')
+const specialCountryMap = new Map([
+  ['South Korea', 'Republic of Korea'],
+  ['UAE', 'United Arab Emirates'],
+  ['UK', 'United Kingdom of Great Britain and Northern Ireland'],
+])
 
 module.exports = async function getAliyun() {
   const ips = new Map()
@@ -67,10 +73,17 @@ module.exports = async function getAliyun() {
         const ranges = cidr.split(',').map(s => s.trim()).filter(Boolean)
         const addressesv4 = ranges.filter(r => r.includes('.'))
         const addressesv6 = ranges.filter(r => r.includes(':'))
+        const countryCandidates = currentRegionName?.split(' (')?.filter(s => !s.includes(')')) ?? []
+        const country =
+          countryCandidates
+            .map(c => specialCountryMap.get(c) || c)
+            .map(candidate => iso.whereCountry(candidate) || iso.whereAlpha2(candidate) || iso.whereAlpha3(candidate))
+            .find(Boolean)?.alpha2 ?? null
 
         if (!ips.get(currentRegionName)) {
           ips.set(currentRegionName, {
             cloud: 'Aliyun',
+            country,
             region: currentRegionName,
             regionId: currentRegionIdInTable,
             service: 'DTS',

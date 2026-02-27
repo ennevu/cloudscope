@@ -1,10 +1,10 @@
 const regionMap = new Map([
-	['jp-west-1','Osaka'],
-	['jp-west-2','Osaka'],
-	['jp-east-1','Tokyo'],
-	['jp-east-2','Tokyo'],
-	['jp-east-3','Tokyo'],
-	['jp-east-4','Tokyo'],
+	['jp-west-1',{region:'Osaka', country: 'JP'}],
+	['jp-west-2',{region:'Osaka', country: 'JP'}],
+	['jp-east-1',{region:'Tokyo', country: 'JP'}],
+	['jp-east-2',{region:'Tokyo', country: 'JP'}],
+	['jp-east-3',{region:'Tokyo', country: 'JP'}],
+	['jp-east-4',{region:'Tokyo', country: 'JP'}],
 ])
 
 module.exports = async function getNifcloud() {
@@ -18,7 +18,8 @@ module.exports = async function getNifcloud() {
 			} else {
 				ips.set(entry.region, {
 					cloud: 'NIFCloud',
-          region: regionMap.get(entry.region) || null,
+          region: regionMap.get(entry.region)?.region || null,
+          country: regionMap.get(entry.region)?.country || null,
           regionId: entry.region,
           service: null,
           addressesv4: entry.ip_prefix.includes('.') ? [entry.ip_prefix] : [],
