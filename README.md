@@ -1,8 +1,8 @@
 # cloudscope
-
 [![npm version](https://img.shields.io/npm/v/cloudscope.svg)](https://www.npmjs.com/package/cloudscope)
 [![license](https://img.shields.io/npm/l/cloudscope.svg)](./LICENSE)
 [![CI](https://github.com/ennevu/cloudscope/actions/workflows/ci.yml/badge.svg)](https://github.com/ennevu/cloudscope/actions/workflows/ci.yml)
+
 
 **cloudscope** is a Node.js library to detect whether an IP address belongs to a major cloud provider.
 It fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 addresses efficiently.
@@ -15,6 +15,8 @@ It fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 address
 * Supports **IPv4** and **IPv6**
 * Cached loading with configurable TTL
 * Filter by provider, service, region or ISO3166 country code
+
+---
 
 ## ☁️ Supported Providers
 
