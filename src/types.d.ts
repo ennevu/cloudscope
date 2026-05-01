@@ -42,7 +42,6 @@ export interface NormalizedRecord {
     | 'Xtom'
     | 'Akile'
     | 'Vecloud'
-    | 'Internetone'
     | 'Hostbilby'
     | 'Hostglobal'
     | 'Kamatera'
@@ -64,10 +63,15 @@ export interface NormalizedRecord {
     | 'Mymisaka'
     | 'Railway'
     | 'Csti'
-    | 'Eonscloud'
     | 'Seeweb'
     | 'Axera'
-
+    | 'Hostinger'
+    | '62Yun'
+    | 'DedCloud'
+    | 'Fastly'
+    | 'RapidSeedbox'
+    | 'DynaNode'
+    | 'Cherry Servers';
 
   /** Cloud region identifier (e.g., "eu-west-1", "global") */
   regionId: string;
@@ -127,7 +131,6 @@ export interface LoadOptions {
     | 'xtom'
     | 'akile'
     | 'vecloud'
-    | 'internetone'
     | 'hostbilby'
     | 'hostglobal'
     | 'kamatera'
@@ -149,9 +152,15 @@ export interface LoadOptions {
     | 'mymisaka'
     | 'railway'
     | 'csti'
-    | 'eonscloud'
     | 'seeweb'
     | 'axera'
+    | 'hostinger'
+    | '62yun'
+    | 'dedcloud'
+    | 'fastly'
+    | 'rapidseedbox'
+    | 'dynanode'
+    | 'cherryservers'
   >;
 
   /** Cache TTL in milliseconds (default: 6h) */
@@ -222,6 +231,15 @@ export interface DataSummary {
 
   /** Number of normalized records */
   count: number;
+
+  /** Number of loaded CIDR prefixes */
+  ipCount: number;
+
+  /** Number of loaded IPv4 CIDR prefixes */
+  ipv4Count: number;
+
+  /** Number of loaded IPv6 CIDR prefixes */
+  ipv6Count: number;
 
   /** List of available providers */
   providers: string[];

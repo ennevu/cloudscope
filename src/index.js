@@ -71,7 +71,6 @@ async function load(opts = {}) {
       'xtom',
       'akile',
       'vecloud',
-      'internetone',
       'hostbilby',
       'hostglobal',
       'kamatera',
@@ -93,9 +92,15 @@ async function load(opts = {}) {
       'mymisaka',
       'railway',
       'csti',
-      'eonscloud',
       'seeweb',
       'axera',
+      'hostinger',
+      '62yun',
+      'dedcloud',
+      'fastly',
+      'rapidseedbox',
+      'dynanode',
+      'cherryservers',
     ],
     ttlMs = _store.ttlMs,
     force = false,
@@ -192,6 +197,10 @@ function isIp(ip, options = {}) {
  * Get a lightweight summary of the current in-memory dataset.
  */
 function getData() {
+  const ipCounts = {
+    ipv4: _store.records
+  }
+
   return {
     loadedAt: _store.loadedAt,
     ttlMs: _store.ttlMs,

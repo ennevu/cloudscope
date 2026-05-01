@@ -1,3 +1,14 @@
+## [0.2.3] - 2026-04-30
+### Fixed
+ - Fixed Aliyun incorrect parsing bug due to provider site update
+ - Fixed pumpCloud incorrect parsing bug (city was removed)
+ - Removed Eons Cloud references and Interetone (not reachable anymore)
+ - Added country mapping for Oracle Cloud (previously was null)
+ - Fixed missing mapping regions for AWS : us-gov-west-1, us-gov-east-1, me-west-1, sa-west-1 and us-south-1 and Aliyun: na-south-1
+
+### Added
+ - Added support for Hostinger, 62Yun, Fastly, DedCloud, Cherry Servers, RapidSeedbox, Dynanode
+
 ## [0.2.1] - 2026-02-20
 
 ### Fixed

@@ -5,6 +5,43 @@ const specialCountryMap = new Map([
   ['UAE', 'United Arab Emirates'],
   ['UK', 'United Kingdom of Great Britain and Northern Ireland'],
 ])
+const regionCountryMap = new Map([
+  ['ap-northeast-1', 'JP'],
+  ['ap-northeast-2', 'KR'],
+  ['ap-south-1', 'IN'],
+  ['ap-southeast-1', 'SG'],
+  ['ap-southeast-2', 'AU'],
+  ['ap-southeast-3', 'MY'],
+  ['ap-southeast-5', 'ID'],
+  ['ap-southeast-6', 'PH'],
+  ['ap-southeast-7', 'TH'],
+  ['cn-hongkong', 'HK'],
+  ['eu-central-1', 'DE'],
+  ['eu-west-1', 'GB'],
+  ['me-central-1', 'SA'],
+  ['me-east-1', 'AE'],
+  ['na-south-1', 'MX'],
+  ['us-east-1', 'US'],
+  ['us-west-1', 'US'],
+])
+
+function getCountry(regionName, regionId) {
+  if (regionCountryMap.has(regionId)) return regionCountryMap.get(regionId)
+  if (regionId?.startsWith('cn-')) return 'CN'
+
+  const countryCandidates = regionName?.split(' (')?.filter(s => !s.includes(')')) ?? []
+  return countryCandidates
+    .map(c => specialCountryMap.get(c) || c)
+    .map(candidate => iso.whereCountry(candidate) || iso.whereAlpha2(candidate) || iso.whereAlpha3(candidate))
+    .find(Boolean)?.alpha2 ?? null
+}
+
+function normalizeRange(range) {
+  if (range.includes('/')) return range
+  if (range.includes('.')) return `${range}/32`
+  if (range.includes(':')) return `${range}/128`
+  return range
+}
 
 module.exports = async function getAliyun() {
   const ips = new Map()
@@ -17,7 +54,7 @@ module.exports = async function getAliyun() {
     const $tabs = $('h2, h3').filter((_, el) =>
       $(el).text().trim() === 'Appendix: DTS server IP address ranges'
     ).first()
-    const $nodes = $('h2, table').toArray()
+    const $nodes = $('h2, h3, table').toArray()
     const startIdx = $nodes.findIndex(n => n === $tabs[0])
     if (startIdx === -1) {
       return {}
@@ -33,8 +70,8 @@ module.exports = async function getAliyun() {
 
       if (tag === 'h2' && text === 'FAQ') { break }
 
-      if (tag === 'h2') {
-        // These are the region names  like "China (Hong Kong)"
+      if (tag === 'h2' || tag === 'h3') {
+        // These are section labels like "The Chinese mainland" and "Other regions".
         if (text && !text.startsWith('Appendix:')) {
           currentRegionName = text
         }
@@ -53,7 +90,9 @@ module.exports = async function getAliyun() {
 
         let type, cidr
         if (cells.length >= 3) {
-          currentRegionIdInTable = cells[0]
+          if (cells[0]) {
+            currentRegionIdInTable = cells[0]
+          }
           type = cells[1]
           cidr = cells[2]
         } else if (cells.length === 2) {
@@ -70,32 +109,26 @@ module.exports = async function getAliyun() {
           return
         }
 
-        const ranges = cidr.split(',').map(s => s.trim()).filter(Boolean)
+        const ranges = cidr.split(/[\s,]+/).map(s => s.trim()).filter(Boolean).map(normalizeRange)
         const addressesv4 = ranges.filter(r => r.includes('.'))
         const addressesv6 = ranges.filter(r => r.includes(':'))
-        const countryCandidates = currentRegionName?.split(' (')?.filter(s => !s.includes(')')) ?? []
-        const country =
-          countryCandidates
-            .map(c => specialCountryMap.get(c) || c)
-            .map(candidate => iso.whereCountry(candidate) || iso.whereAlpha2(candidate) || iso.whereAlpha3(candidate))
-            .find(Boolean)?.alpha2 ?? null
+        const country = getCountry(currentRegionName, currentRegionIdInTable)
+        const key = currentRegionIdInTable
 
-        if (!ips.get(currentRegionName)) {
-          ips.set(currentRegionName, {
+        if (!ips.has(key)) {
+          ips.set(key, {
             cloud: 'Aliyun',
             country,
-            region: currentRegionName,
+            region: currentRegionIdInTable,
             regionId: currentRegionIdInTable,
             service: 'DTS',
-            addressesv4,
-            addressesv6
+            addressesv4: [],
+            addressesv6: []
           })
-        } else if (!ips.get(currentRegionName).region) {
-          ips.get(currentRegionName).region = currentRegionName
         }
 
-        ips.get(currentRegionName).addressesv4.push(...addressesv4)
-        ips.get(currentRegionName).addressesv6.push(...addressesv6)
+        ips.get(key).addressesv4.push(...addressesv4)
+        ips.get(key).addressesv6.push(...addressesv6)
       })
     }
 

@@ -7,6 +7,8 @@
     ['us-west-2',{region:'Oregon', country: 'US'}],
     ['us-east-1',{region:'N. Virginia', country: 'US'}],
     ['us-east-2',{region:'Ohio', country: 'US'}],
+    ['us-gov-east-1',{region:'AWS GovCloud (US-East)', country: 'US'}],
+    ['us-gov-west-1',{region:'AWS GovCloud (US-West)', country: 'US'}],
     ['eu-central-1', {region:'Frankfurt', country: 'DE'}],
     ['eu-central-2',{region:'Zurich', country: 'CH'}],
     ['eu-west-1',{region:'Ireland', country: 'IE'}],
@@ -17,6 +19,7 @@
     ['eu-north-1',{region:'Stockholm', country: 'SE'}],
     ['il-central-1',{region:'Tel Aviv', country: 'IL'}],
     ['sa-east-1',{region:'Sao Paolo', country: 'BR'}],
+    ['sa-west-1',{region:'Santiago', country: 'CL'}],
     ['mx-central-1',{region:'Mexico City', country: 'MX'}],
     ['ap-south-1',{region:'Mumbai', country: 'IN'}],
     ['ap-south-2',{region:'Hyderabad', country: 'IN'}],
@@ -36,6 +39,8 @@
     ['cn-northwest-1',{region:'Ningxia', country: 'CN'}],
     ['me-south-1',{region:'Bahrain', country: 'BH'}],
     ['me-central-1', {region:'UAE', country: 'AE'}],
+    ['me-west-1', {region:'Saudi Arabia', country: 'SA'}],
+    ['us-south-1', {region:'Dallas', country: 'US'}],
     ['eusc-de-east-1',{region:'Berlin', country: 'DE'}]
   ])
 

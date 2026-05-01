@@ -22,7 +22,6 @@ const gFeeds = new Map([
   ['xtom', { url: 'https://geofeed.xtom.de/files/as-xtom.csv', name: 'xTom' }],
   ['akile', { url: 'https://geofeed.akile.io/geofeed.csv', name: 'Akile Cloud' }],
   ['vecloud', { url: 'https://en.vecloud.com/apnic/geofeed/geofeed.csv', name: 'VeCloud' }],
-  ['internetone', { url: 'https://internetone.it/geofeed_file.csv', name: 'Internet.One' }],
   ['hostbilby', { url: 'https://hostbilby.com/geofeed.csv', name: 'HostBilby' }],
   ['hostglobal', { url: 'https://hostglobal.plus/geofeeds.csv', name: 'HostGlobal' }],
   ['kamatera', { url: 'https://www.kamatera.com/geofeed.csv', name: 'Kamatera' }],
@@ -45,7 +44,15 @@ const gFeeds = new Map([
   ['railway', { url: 'https://geofeed.railway.com', name: 'Railway' }],
   ['csti', { url: 'https://csti.ch/geofeed.csv', name: 'CSTI' }],
   ['seeweb', { url: 'https://www.as12637.net/geofeed.csv', name: 'SeeWeb' }],
-  ['axera', { url: 'https://as13097.net/geofeed/geofeed.csv', name: 'Axera' }]
+  ['axera', { url: 'https://as13097.net/geofeed/geofeed.csv', name: 'Axera' }],
+  ['hostinger', { url: 'https://raw.githubusercontent.com/hostinger/geofeed/main/geofeed.csv', name: 'Hostinger' }],
+  ['62yun', { url:'https://62yun.co/geofeed.csv', name: '62Yun' }],
+  ['dedcloud', { url: 'https://dedcloud.com/api/geofeed.csv', name: 'DedCloud' }],
+  ['fastly', { url: 'https://ip-geolocation.fastly.com/', name: 'Fastly' }],
+  ['rapidseedbox', { url: 'https://geofeed.rapidseedbox.com/geofeed.csv', name: 'RapidSeedbox' }],
+  ['dynanode', { url: 'https://dynanode.io/geofeed.txt', name: 'DynaNode' }],
+  ['cherryservers', { url: 'https://geofeed.cherryservers.com/geofeed.csv', name: 'Cherry Servers' }],
+
 ])
 async function getGeofeed(id) {
   const ips = new Map()
@@ -55,17 +62,27 @@ async function getGeofeed(id) {
     const rows = papa.parse(csv, { comments: '#' }).data
     for (const entry of rows) {
       if (entry[0] === 'ip_range' || entry[0] === 'network' || entry[0] === 'prefix') continue
-      if (ips.has(entry[3]) && entry[3]) {
-        entry[0].includes('.') ? ips.get(entry[3]).addressesv4.push(entry[0]) : ips.get(entry[3]).addressesv6.push(entry[0])
-      } else if (entry[3]) {
-        ips.set(entry[3], {
+      const prefix = entry[0]
+      const country = entry[1]
+      const regionId = entry[2]
+      const city = entry[3]
+      const region = city || regionId || country
+      if (!prefix || !region) continue
+
+      const key = `${country || ''}|${regionId || ''}|${region}`
+      if (ips.has(key)) {
+        prefix.includes('.') ? ips.get(key).addressesv4.push(prefix) : ips.get(key).addressesv6.push(prefix)
+      } else {
+        const isAnycastRegion = region.toLowerCase() === 'anycast'
+        const isAnycastCountry = country?.toLowerCase() === 'anycast'
+        ips.set(key, {
           cloud: name,
-          region: entry[3].toLowerCase() === 'anycast' ? 'Global' : entry[3],
-          country: entry[1].toLowerCase() === 'anycast' ? null : entry[1],
-          regionId: entry[2].toLowerCase() === 'anycast' ? 'global' : entry[2],
+          region: isAnycastRegion ? 'Global' : region,
+          country: isAnycastCountry ? null : country,
+          regionId: regionId?.toLowerCase() === 'anycast' ? 'global' : regionId || region,
           service: null,
-          addressesv4: entry[0].includes('.') ? [entry[0]] : [],
-          addressesv6: entry[0].includes(':') ? [entry[0]] : []
+          addressesv4: prefix.includes('.') ? [prefix] : [],
+          addressesv6: prefix.includes(':') ? [prefix] : []
         })
       }
     }
