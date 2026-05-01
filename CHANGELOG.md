@@ -1,3 +1,7 @@
+## [0.2.4] - 2026-05-01
+### Fixed
+ - Changed to static mapping for Aliyun (previously was dynamic and broke due to provider site update)
+ 
 ## [0.2.3] - 2026-04-30
 ### Fixed
  - Fixed Aliyun incorrect parsing bug due to provider site update

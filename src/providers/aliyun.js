@@ -1,40 +1,37 @@
 const cheerio = require('cheerio')
-const iso = require('iso-3166-1')
-const specialCountryMap = new Map([
-  ['South Korea', 'Republic of Korea'],
-  ['UAE', 'United Arab Emirates'],
-  ['UK', 'United Kingdom of Great Britain and Northern Ireland'],
-])
-const regionCountryMap = new Map([
-  ['ap-northeast-1', 'JP'],
-  ['ap-northeast-2', 'KR'],
-  ['ap-south-1', 'IN'],
-  ['ap-southeast-1', 'SG'],
-  ['ap-southeast-2', 'AU'],
-  ['ap-southeast-3', 'MY'],
-  ['ap-southeast-5', 'ID'],
-  ['ap-southeast-6', 'PH'],
-  ['ap-southeast-7', 'TH'],
-  ['cn-hongkong', 'HK'],
-  ['eu-central-1', 'DE'],
-  ['eu-west-1', 'GB'],
-  ['me-central-1', 'SA'],
-  ['me-east-1', 'AE'],
-  ['na-south-1', 'MX'],
-  ['us-east-1', 'US'],
-  ['us-west-1', 'US'],
+const regionMap = new Map([
+  ['global',{region:'Global', country: null}],
+  ['ap-south-1',{region:'', country: 'IN'}],
+  ['ap-southeast-1',{region:'Singapore', country: 'SG'}],
+  ['ap-southeast-2',{region:'', country: 'AU'}],
+  ['ap-southeast-3',{region:'Kuala Lumpur', country: 'MY'}],
+  ['ap-southeast-5',{region:'Jakarta', country: 'ID'}],
+  ['ap-southeast-6',{region:'Manila', country: 'PH'}],
+  ['ap-southeast-7',{region:'Bangkok', country: 'TH'}],
+  ['ap-northeast-1',{region:'Tokyo', country: 'JP'}],
+  ['ap-northeast-2',{region:'Seul', country: 'KR'}],
+  ['cn-hongkong',{region:'Hong Kong', country: 'HK'}],
+  ['eu-central-1',{region:'Frankfurt', country: 'DE'}],
+  ['eu-west-1',{region:'London', country: 'GB'}],
+  ['me-central-1',{region:'Riyadh', country: 'SA'}],
+  ['me-east-1',{region:'Dubai', country: 'AE'}],
+  ['na-south-1',{region:'Mexico City', country: 'MX'}],
+  ['us-east-1',{region:'Virginia', country: 'US'}],
+  ['us-west-1',{region:'Silicon Valley', country: 'US'}],
+  ['cn-hangzhou',{region:'Hangzhou', country: 'CN'}],
+  ['cn-shanghai',{region:'Shanghai', country: 'CN'}],
+  ['cn-qingdao',{region:'Qingdao', country: 'CN'}],
+  ['cn-beijing',{region:'Beijing', country: 'CN'}],
+  ['cn-zhangjiakou',{region:'Zhangjiakou', country: 'CN'}],
+  ['cn-huhehaote',{region:'Hohot', country: 'CN'}],
+  ['cn-wulanchabu',{region:'Ulanqab', country: 'CN'}],
+  ['cn-shenzhen',{region:'Shenzhen', country: 'CN'}],
+  ['cn-heyuan',{region:'Heyuan', country: 'CN'}],
+  ['cn-guangzhou',{region:'Guangzhou', country: 'CN'}],
+  ['cn-wuhan-lr',{region:'Wuhan', country: 'CN'}],
+  ['cn-chengdu',{region:'Chengdu', country: 'CN'}]
 ])
 
-function getCountry(regionName, regionId) {
-  if (regionCountryMap.has(regionId)) return regionCountryMap.get(regionId)
-  if (regionId?.startsWith('cn-')) return 'CN'
-
-  const countryCandidates = regionName?.split(' (')?.filter(s => !s.includes(')')) ?? []
-  return countryCandidates
-    .map(c => specialCountryMap.get(c) || c)
-    .map(candidate => iso.whereCountry(candidate) || iso.whereAlpha2(candidate) || iso.whereAlpha3(candidate))
-    .find(Boolean)?.alpha2 ?? null
-}
 
 function normalizeRange(range) {
   if (range.includes('/')) return range
@@ -112,14 +109,13 @@ module.exports = async function getAliyun() {
         const ranges = cidr.split(/[\s,]+/).map(s => s.trim()).filter(Boolean).map(normalizeRange)
         const addressesv4 = ranges.filter(r => r.includes('.'))
         const addressesv6 = ranges.filter(r => r.includes(':'))
-        const country = getCountry(currentRegionName, currentRegionIdInTable)
         const key = currentRegionIdInTable
 
         if (!ips.has(key)) {
           ips.set(key, {
             cloud: 'Aliyun',
-            country,
-            region: currentRegionIdInTable,
+            country: regionMap.get(currentRegionIdInTable)?.country ||  null,
+            region: regionMap.get(currentRegionIdInTable)?.region || currentRegionName,
             regionId: currentRegionIdInTable,
             service: 'DTS',
             addressesv4: [],

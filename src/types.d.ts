@@ -232,15 +232,6 @@ export interface DataSummary {
   /** Number of normalized records */
   count: number;
 
-  /** Number of loaded CIDR prefixes */
-  ipCount: number;
-
-  /** Number of loaded IPv4 CIDR prefixes */
-  ipv4Count: number;
-
-  /** Number of loaded IPv6 CIDR prefixes */
-  ipv6Count: number;
-
   /** List of available providers */
   providers: string[];
 }
