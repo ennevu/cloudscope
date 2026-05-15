@@ -1,87 +1,185 @@
-// types.d.ts
+import type ipaddr = require('ipaddr.js');
+
+export type ProviderId =
+  | 'azure'
+  | 'aws'
+  | 'gcp'
+  | 'ibm'
+  | 'oracle'
+  | 'digitalocean'
+  | 'linode'
+  | 'exoscale'
+  | 'vultr'
+  | 'nifcloud'
+  | 'scaleway'
+  | 'cloudflare'
+  | 'aliyun'
+  | 'aruba'
+  | 'elastx'
+  | 'hetzner'
+  | 'eurohoster'
+  | 'hostealo'
+  | 'zappiehost'
+  | 'hosthatch'
+  | 'pumpcloud'
+  | 'kaopucloud'
+  | 'cloudcomtr'
+  | 'crowncloud'
+  | 'mikicloud'
+  | 'gthost'
+  | 'lowhosting'
+  | 'mathost'
+  | 'mchost'
+  | 'mclouds'
+  | 'halocloud'
+  | 'rarecloud'
+  | 'jinxcloud'
+  | 'xtom'
+  | 'akile'
+  | 'vecloud'
+  | 'hostbilby'
+  | 'hostglobal'
+  | 'kamatera'
+  | 'gcore'
+  | 'contabo'
+  | 'timeweb'
+  | 'seasoncloud'
+  | 'datalix'
+  | 'c1vhosting'
+  | '3hcloud'
+  | 'cloudzy'
+  | 'cloud225'
+  | 'cloudnet'
+  | 'sejacloud'
+  | 'letscloud'
+  | 'maikiwi'
+  | 'serverside'
+  | 'mycloud'
+  | 'mymisaka'
+  | 'railway'
+  | 'csti'
+  | 'seeweb'
+  | 'axera'
+  | 'hostinger'
+  | '62yun'
+  | 'dedcloud'
+  | 'fastly'
+  | 'rapidseedbox'
+  | 'dynanode'
+  | 'cherryservers';
+
+export type CompanyId = 'datadog' | 'github' | 'terraform' | 'circleci' | 'zendesk' | 'okta' | 'grafana';
+
+export type ProviderName =
+  | 'Amazon'
+  | 'Microsoft'
+  | 'Google'
+  | 'Oracle'
+  | 'IBM'
+  | 'Digital Ocean'
+  | 'Linode'
+  | 'Exoscale'
+  | 'Vultr'
+  | 'NIFCloud'
+  | 'Scaleway'
+  | 'Cloudflare'
+  | 'Aliyun'
+  | 'Aruba Cloud'
+  | 'Elastx'
+  | 'Hetzner'
+  | 'EuroHoster'
+  | 'Hostealo'
+  | 'ZappieHost'
+  | 'HostHatch'
+  | 'PumpCloud'
+  | 'Kaopu Cloud'
+  | 'Cloud.com.tr'
+  | 'CrownCloud'
+  | 'Miku Cloud'
+  | 'GT Host'
+  | 'Low Hosting'
+  | 'MatHost'
+  | 'McHost'
+  | 'MClouds.ru'
+  | 'Halo Cloud'
+  | 'Rare Cloud'
+  | 'Jinx Cloud'
+  | 'xTom'
+  | 'Akile Cloud'
+  | 'VeCloud'
+  | 'HostBilby'
+  | 'HostGlobal'
+  | 'Kamatera'
+  | 'GCore'
+  | 'Contabo'
+  | 'TimeWeb'
+  | 'Season Cloud'
+  | 'DataLix'
+  | 'C1V Hosting'
+  | '3H Cloud'
+  | 'Cloudzy'
+  | 'Cloud225'
+  | 'CloudNet'
+  | 'Seja Cloud'
+  | 'Lets Cloud'
+  | 'Maikiwi'
+  | 'Serverside'
+  | 'MyCloud'
+  | 'MyMisaka'
+  | 'Railway'
+  | 'CSTI'
+  | 'SeeWeb'
+  | 'Axera'
+  | 'Hostinger'
+  | '62Yun'
+  | 'DedCloud'
+  | 'Fastly'
+  | 'RapidSeedbox'
+  | 'DynaNode'
+  | 'Cherry Servers'
+  | 'DataDog'
+  | 'GitHub'
+  | 'Terraform'
+  | 'CircleCI'
+  | 'Zendesk'
+  | 'Okta'
+  | 'Grafana';
+
+export type RecordType = 'cloud' | 'cdn' | 'saas' | string;
+
+export type IPv4Cidr = [ipaddr.IPv4, number];
+export type IPv6Cidr = [ipaddr.IPv6, number];
 
 /**
- * A normalized record of cloud provider CIDR ranges.
+ * A normalized record of provider CIDR ranges.
  */
 export interface NormalizedRecord {
-  /** Cloud provider name */
-  provider:
-    | 'Amazon'
-    | 'Microsoft'
-    | 'Google'
-    | 'Oracle'
-    | 'IBM'
-    | 'Digital Ocean'
-    | 'Linode'
-    | 'Exoscale'
-    | 'Vultr'
-    | 'Nifcloud'
-    | 'Scaleway'
-    | 'Cloudflare'
-    | 'Aliyun'
-    | 'Elastx'
-    | 'Aruba'
-    | 'Hetzner'
-    | 'Eurohoster'
-    | 'Hostealo'
-    | 'Zappiehost'
-    | 'Hosthatch'
-    | 'Pumpcloud'
-    | 'Kaopucloud'
-    | 'Cloudcomtr'
-    | 'Crowncloud'
-    | 'Mikicloud'
-    | 'Gthost'
-    | 'Lowhosting'
-    | 'Mathost'
-    | 'Mchost'
-    | 'Mclouds'
-    | 'Halocloud'
-    | 'Rarecloud'
-    | 'Jinxcloud'
-    | 'Xtom'
-    | 'Akile'
-    | 'Vecloud'
-    | 'Hostbilby'
-    | 'Hostglobal'
-    | 'Kamatera'
-    | 'Gcore'
-    | 'Contabo'
-    | 'Timeweb'
-    | 'Seasoncloud'
-    | 'Datalix'
-    | 'C1vhosting'
-    | '3hcloud'
-    | 'Cloudzy'
-    | 'Cloud225'
-    | 'Cloudnet'
-    | 'Sejacloud'
-    | 'Letscloud'
-    | 'Maikiwi'
-    | 'Serverside'
-    | 'Mycloud'
-    | 'Mymisaka'
-    | 'Railway'
-    | 'Csti'
-    | 'Seeweb'
-    | 'Axera'
-    | 'Hostinger'
-    | '62Yun'
-    | 'DedCloud'
-    | 'Fastly'
-    | 'RapidSeedbox'
-    | 'DynaNode'
-    | 'Cherry Servers';
+  /** Provider or company name */
+  provider: ProviderName | string;
 
-  /** Cloud region identifier (e.g., "eu-west-1", "global") */
-  regionId: string;
+  /** Provider category */
+  type: RecordType[];
+
+  /** Country code (ISO 3166-1 alpha-2), when available */
+  country?: string | null;
+
+  /** Region identifier (e.g. "eu-west-1", "global"), when available */
+  regionId?: string | null;
 
   /** Human-readable region name, when available */
-  region: string | null;
+  region?: string | null;
 
-  /** Specific service name (e.g., "S3", "Compute"), when available */
-  service: string | null;
+  /** Specific service names, when available */
+  service: string[] | null;
 
+  /** List of parsed IPv4 CIDR ranges */
+  addressesv4: IPv4Cidr[];
+
+  /** List of parsed IPv6 CIDR ranges */
+  addressesv6: IPv6Cidr[];
+}
+
+export interface ExportedRecord extends Omit<NormalizedRecord, 'addressesv4' | 'addressesv6'> {
   /** List of IPv4 CIDR ranges */
   addressesv4: string[];
 
@@ -94,74 +192,10 @@ export interface NormalizedRecord {
  */
 export interface LoadOptions {
   /** Providers to load. Defaults to all. */
-  providers?: Array<
-    | 'azure'
-    | 'aws'
-    | 'gcp'
-    | 'ibm'
-    | 'oracle'
-    | 'digitalocean'
-    | 'linode'
-    | 'exoscale'
-    | 'vultr'
-    | 'nifcloud'
-    | 'scaleway'
-    | 'cloudflare'
-    | 'aliyun'
-    | 'elastx'
-    | 'aruba'
-    | 'hetzner'
-    | 'eurohoster'
-    | 'hostealo'
-    | 'zappiehost'
-    | 'hosthatch'
-    | 'pumpcloud'
-    | 'kaopucloud'
-    | 'cloudcomtr'
-    | 'crowncloud'
-    | 'mikicloud'
-    | 'gthost'
-    | 'lowhosting'
-    | 'mathost'
-    | 'mchost'
-    | 'mclouds'
-    | 'halocloud'
-    | 'rarecloud'
-    | 'jinxcloud'
-    | 'xtom'
-    | 'akile'
-    | 'vecloud'
-    | 'hostbilby'
-    | 'hostglobal'
-    | 'kamatera'
-    | 'gcore'
-    | 'contabo'
-    | 'timeweb'
-    | 'seasoncloud'
-    | 'datalix'
-    | 'c1vhosting'
-    | '3hcloud'
-    | 'cloudzy'
-    | 'cloud225'
-    | 'cloudnet'
-    | 'sejacloud'
-    | 'letscloud'
-    | 'maikiwi'
-    | 'serverside'
-    | 'mycloud'
-    | 'mymisaka'
-    | 'railway'
-    | 'csti'
-    | 'seeweb'
-    | 'axera'
-    | 'hostinger'
-    | '62yun'
-    | 'dedcloud'
-    | 'fastly'
-    | 'rapidseedbox'
-    | 'dynanode'
-    | 'cherryservers'
-  >;
+  providers?: ProviderId[];
+
+  /** Companies/SaaS providers to load. Defaults to all. */
+  companies?: CompanyId[];
 
   /** Cache TTL in milliseconds (default: 6h) */
   ttlMs?: number;
@@ -175,7 +209,7 @@ export interface LoadOptions {
  */
 export interface IsIpOptions {
   /** Restrict to a specific provider */
-  provider?: NormalizedRecord['provider'];
+  provider?: ProviderName | string;
 
   /** Restrict to a specific service */
   service?: string;
@@ -187,37 +221,23 @@ export interface IsIpOptions {
   country?: string | string[];
 }
 
-/**
- * Result returned by `isIp`.
- */
-export interface IsIpResult {
-  /** Whether the IP matched */
-  match: boolean;
-
-  /** Reason if not matched */
-  reason?: 'invalid_ip' | 'provider_not_loaded' | 'data_not_loaded';
-
+export interface IpMatch extends Omit<NormalizedRecord, 'addressesv4' | 'addressesv6'> {
   /** IP version of the match */
-  version?: 'ipv4' | 'ipv6';
-
-  /** Provider that matched */
-  provider?: NormalizedRecord['provider'];
-
-  /** Country code (ISO 3166-1 alpha-2), when available */
-  country?: string;
-
-  /** Region identifier */
-  regionId?: string;
-
-  /** Region name */
-  region?: string | null;
-
-  /** Service name */
-  service?: string | null;
+  version: 'ipv4' | 'ipv6';
 
   /** CIDR block that matched */
-  cidr?: string;
+  cidr: string;
 }
+
+export type IsIpResult =
+  | {
+      match: true;
+      matches: IpMatch[];
+    }
+  | {
+      match: false;
+      reason?: 'invalid_ip' | 'provider_not_loaded' | 'data_not_loaded';
+    };
 
 /**
  * Lightweight summary of the dataset.
@@ -247,4 +267,4 @@ export function getData(): DataSummary;
 
 export function refresh(): Promise<{ loadedAt: number; count: number }>;
 
-export function exportData(): NormalizedRecord[];
+export function exportData(): ExportedRecord[];

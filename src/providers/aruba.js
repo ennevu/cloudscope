@@ -1,8 +1,8 @@
 const papa = require('papaparse')
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 
 module.exports = async function getAruba() {
   const ips = new Map()
-  const cityMap = new Map()
   try {
     // Geofeed contains wrong country to city mapping (come rows contain wrong city but correct country)
     let csv = (await (await fetch('https://geoloc.aruba.it/geo.csv', { maxRedirects: 10 })).text())
@@ -19,16 +19,17 @@ module.exports = async function getAruba() {
 
     for (const entry of rows) {
       if (ips.has(entry[3])) {
-        entry[0].includes('.') ? ips.get(entry[3]).addressesv4.push(entry[0]) : ips.get(entry[3]).addressesv6.push(entry[0])
+        entry[0].includes('.') ? ips.get(entry[3]).addressesv4.push(parseCIDR(entry[0])) : ips.get(entry[3]).addressesv6.push(parseCIDR(entry[0]))
       } else if (entry[3]) {
         ips.set(entry[3], {
-          cloud: 'Aruba Cloud',
+          provider: 'Aruba Cloud',
+          type:['cloud'],
           region: entry[3]?.trim(),
           country: entry[1],
           regionId: entry[2],
           service: null,
-          addressesv4: entry[0].includes('.') ? [entry[0]] : [],
-          addressesv6: entry[0].includes(':') ? [entry[0]] : []
+          addressesv4: entry[0].includes('.') ? [parseCIDR(entry[0])] : [],
+          addressesv6: entry[0].includes(':') ? [parseCIDR(entry[0])] : []
         })
       }
     }

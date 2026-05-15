@@ -1,4 +1,5 @@
 const iso = require('iso-3166-1')
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 module.exports = async function getIBM() {
   const ips = new Map()
   try {
@@ -10,14 +11,16 @@ module.exports = async function getIBM() {
       for (const net of ["front_end_public_network", "load_balancers_ips"]) {
         for (const blocks of entry[net] ?? []) {
           for (const cidr of blocks?.cidr_blocks ?? []) {
-            cidr.includes('.') ? addressesv4.push(cidr) : null
-            cidr.includes(':') ? addressesv6.push(cidr) : null
+            if (!cidr) continue
+            cidr.includes('.') ? addressesv4.push(parseCIDR(cidr)) : null
+            cidr.includes(':') ? addressesv6.push(parseCIDR(cidr)) : null
           }
         }
       }
       if (addressesv4.length > 0 || addressesv6.length > 0) {
         ips.set(entry.key, {
-          cloud: 'IBM',
+          provider: 'IBM',
+          type:['cloud'],
           region: entry.city,
           country: country,
           regionId: entry.key,

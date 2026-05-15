@@ -1,12 +1,13 @@
 const cheerio = require('cheerio')
-
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 module.exports = async function getScaleway() {
 	/** Helpers **/
 	const isIp = (t) => t.includes('.') || t.includes(':')
 
 	const ips = new Map([
 		['globalnull', {
-			cloud: 'Scaleway',
+			provider: 'Scaleway',
+			type: ['cloud'],
 			region: 'Global',
 			country: null,
 			regionId: 'global',
@@ -29,7 +30,7 @@ module.exports = async function getScaleway() {
 			$section.find('h3:contains("IPv4") + ul code').each((_, el) => {
 				const t = $(el).text().trim()
 				if (isIp(t)){
-					ips.get('globalnull').addressesv4.push(t)
+					ips.get('globalnull').addressesv4.push(parseCIDR(t))
 				}
 			})
 
@@ -37,7 +38,7 @@ module.exports = async function getScaleway() {
 			$section.find('h3:contains("IPv6") + ul code').each((_, el) => {
 				const t = $(el).text().trim()
 				if (isIp(t)){
-					ips.get('globalnull').addressesv6.push(t)
+					ips.get('globalnull').addressesv6.push(parseCIDR(t))
 				}
 			})
 		}

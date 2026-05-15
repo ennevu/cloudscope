@@ -1,4 +1,5 @@
 const cheerio = require('cheerio')
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 const regionMap = new Map([
   ['global',{region:'Global', country: null}],
   ['ap-south-1',{region:'', country: 'IN'}],
@@ -107,17 +108,18 @@ module.exports = async function getAliyun() {
         }
 
         const ranges = cidr.split(/[\s,]+/).map(s => s.trim()).filter(Boolean).map(normalizeRange)
-        const addressesv4 = ranges.filter(r => r.includes('.'))
-        const addressesv6 = ranges.filter(r => r.includes(':'))
+        const addressesv4 = ranges.filter(r => r.includes('.') && isValidCIDR(r)).map(r => parseCIDR(r))
+        const addressesv6 = ranges.filter(r => r.includes(':') && isValidCIDR(r)).map(r => parseCIDR(r))
         const key = currentRegionIdInTable
 
         if (!ips.has(key)) {
           ips.set(key, {
-            cloud: 'Aliyun',
+            provider: 'Aliyun',
+            type:['cloud'],
             country: regionMap.get(currentRegionIdInTable)?.country ||  null,
             region: regionMap.get(currentRegionIdInTable)?.region || currentRegionName,
             regionId: currentRegionIdInTable,
-            service: 'DTS',
+            service: ['DTS'],
             addressesv4: [],
             addressesv6: []
           })

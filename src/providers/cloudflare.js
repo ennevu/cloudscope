@@ -1,4 +1,4 @@
-
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 module.exports = async function getCloudflare() {
   const ips = new Map()
   try {
@@ -9,16 +9,17 @@ module.exports = async function getCloudflare() {
     const rows = txt.split('\n').filter(Boolean)
     for (const entry of rows) {
       if (ips.has('global')) {
-        entry.includes('.') ? ips.get('global').addressesv4.push(entry) : ips.get('global').addressesv6.push(entry)
+        entry.includes('.') ? ips.get('global').addressesv4.push(parseCIDR(entry)) : ips.get('global').addressesv6.push(parseCIDR(entry))
       } else {
         ips.set('global', {
-          cloud: 'Cloudflare',
+          provider: 'Cloudflare',
+          type:['cdn'],
           region: 'Global',
           country: null,
           regionId:'global',
           service: null,
-          addressesv4: entry.includes('.') ? [entry] : [],
-          addressesv6: entry.includes(':') ? [entry] : []
+          addressesv4: entry.includes('.') ? [parseCIDR(entry)] : [],
+          addressesv6: entry.includes(':') ? [parseCIDR(entry)] : []
         })
       }
     }

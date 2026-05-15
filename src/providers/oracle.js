@@ -1,3 +1,4 @@
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 const regionMap = new Map([
   ['global',{region:'Global', country: null}],
   ['mx-monterrey-1',{region:'Monterrey', country: 'MX'}],
@@ -67,14 +68,16 @@ module.exports = async function getOracle() {
       const regionInfo = regionMap.get(entry.region)
       const services = [...new Set(entry.cidrs.flatMap(cidr => cidr.tags))]
       for (const service of services) {
+        if (!service) continue
         ips.set(`${entry.region}_${service}`, {
-        cloud: 'Oracle',
-        region: regionInfo?.region || null,
-        country: regionInfo?.country || null,
-        regionId: entry.region,
-        service,
-        addressesv4: entry.cidrs.filter(cidr => cidr.cidr.includes('.') && cidr.tags.includes(service)).map(cidr => cidr.cidr),
-        addressesv6: entry.cidrs.filter(cidr => cidr.cidr.includes(':') && cidr.tags.includes(service)).map(cidr => cidr.cidr)
+          provider: 'Oracle',
+          type:['cloud'],
+          region: regionInfo?.region || null,
+          country: regionInfo?.country || null,
+          regionId: entry.region,
+          service: [service],
+          addressesv4: entry.cidrs.filter(cidr => cidr.cidr.includes('.') && cidr.tags.includes(service) && isValidCIDR(cidr.cidr)).map(cidr => parseCIDR(cidr.cidr)),
+          addressesv6: entry.cidrs.filter(cidr => cidr.cidr.includes(':') && cidr.tags.includes(service) && isValidCIDR(cidr.cidr)).map(cidr => parseCIDR(cidr.cidr))
         })
       }
     }

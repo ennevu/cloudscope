@@ -1,4 +1,5 @@
- const regionMap = new Map([
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
+const regionMap = new Map([
     ['GLOBAL', {region:'Global', country: null}],
     ['af-south-1',{region:'Cape Town', country: 'SA'}],
     ['ca-central-1',{region:'Canada Central', country: 'CA'}],
@@ -51,31 +52,33 @@ module.exports = async function getAws() {
         const json = await (await fetch('https://ip-ranges.amazonaws.com/ip-ranges.json', { maxRedirects: 10 })).json()
         for (const entry of json?.prefixes ?? []) {
             if (ips.has(`${entry.region}_${entry.service}`)) {
-                ips.get(`${entry.region}_${entry.service}`).addressesv4.push(entry.ip_prefix)  //DA VERIFICARE
+                ips.get(`${entry.region}_${entry.service}`).addressesv4.push(parseCIDR(entry.ip_prefix))  //DA VERIFICARE
             } else {
                 ips.set(`${entry.region}_${entry.service}`, {
-                    cloud: 'Amazon',
+                    provider: 'Amazon',
+                    type: ['cloud'],
                     regionId: entry.region,
                     region: regionMap.get(entry.region)?.region || null,
                     country: regionMap.get(entry.region)?.country || null,
-                    service: entry.service,
-                    addressesv4: [entry.ip_prefix],
+                    service: [entry.service],
+                    addressesv4: [parseCIDR(entry.ip_prefix)],
                     addressesv6: []
                 })
             }
         }
         for (const entry of json?.ipv6_prefixes ?? []) {
             if (ips.has(`${entry.region}_${entry.service}`)) {
-                ips.get(`${entry.region}_${entry.service}`).addressesv6.push(entry.ipv6_prefix)  //DA VERIFICARE
+                ips.get(`${entry.region}_${entry.service}`).addressesv6.push(parseCIDR(entry.ipv6_prefix))  //DA VERIFICARE
             } else {
                 ips.set(`${entry.region}_${entry.service}`, {
-                    cloud: 'Amazon',
+                    provider: 'Amazon',
+                    type: ['cloud'],
                     regionId: entry.region,
-                    service: entry.service,
+                    service: [entry.service],
                     region: regionMap.get(entry.region)?.region || null,
                     country: regionMap.get(entry.region)?.country || null,
                     addressesv4: [],
-                    addressesv6: [entry.ipv6_prefix]
+                    addressesv6: [parseCIDR(entry.ipv6_prefix)]
                 })
             }
         }

@@ -1,4 +1,5 @@
 const cheerio = require('cheerio')
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
   const regionMap = new Map([
     ['global',{region:'Global', country: null}],
     ['australiacentral',{region:'Canberra', country: 'AU'}],
@@ -98,13 +99,14 @@ module.exports = async function getAzure() {
         const json = await (await fetch(downloadUrl, { maxRedirects: 10 })).json()
         for (const entry of json?.values ?? []) {
             ips.set(`${entry.properties.region}_${entry.properties.systemService}`, {
-                cloud: entry.properties.platform,
+                provider: entry.properties.platform,
+                type: ['cloud'],
                 regionId: entry.properties.region && entry.properties.region.length > 0 ? entry.properties.region : null,
                 region: regionMap.get(entry.properties.region)?.region || null,
                 country: regionMap.get(entry.properties.region)?.country || null,
-                service: entry.properties.systemService && entry.properties.systemService.length > 0 ? entry.properties.systemService : null,
-                addressesv4: entry.properties.addressPrefixes.filter(cidr => cidr.includes('.')),
-                addressesv6: entry.properties.addressPrefixes.filter(cidr => cidr.includes(':'))
+                service: entry.properties.systemService && entry.properties.systemService.length > 0 ? [entry.properties.systemService] : null,
+                addressesv4: entry.properties.addressPrefixes.filter(cidr => cidr.includes('.') && isValidCIDR(cidr)).map(cidr => parseCIDR(cidr)),
+                addressesv6: entry.properties.addressPrefixes.filter(cidr => cidr.includes(':') && isValidCIDR(cidr)).map(cidr => parseCIDR(cidr))
             })
         }   
     } catch (error) {

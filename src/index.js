@@ -1,6 +1,5 @@
-const Net = require('node:net')
-const { ipInCidr } = require('./cidr')
-const { normalizeRecord } = require('./normalize')
+const {isValid, parse} = require('ipaddr.js')
+const { normalizeClouds, normalizeSaas } = require('./normalize')
 const getAws = require('./providers/aws')
 const getAzure = require('./providers/azure')
 const getGcp = require('./providers/gcp')
@@ -15,6 +14,13 @@ const getScaleway = require('./providers/scaleway')
 const getCloudflare = require('./providers/cloudflare.js')
 const getAliyun = require('./providers/aliyun.js')
 const getAruba = require('./providers/aruba.js')
+const getDataDog = require('./providers/datadog.js')
+const getGitHub = require('./providers/github.js')
+const getTerraform = require('./providers/terraform.js')
+const getCircleCI = require('./providers/circleci.js')
+const getZendesk = require('./providers/zendesk.js')
+const getOkta = require('./providers/okta.js')
+const getGrafana = require('./providers/grafana.js')
 const { getGeofeed, gFeeds} = require('./providers/geofeeds.js')
 
 const supportedProviders = [
@@ -83,7 +89,17 @@ const supportedProviders = [
   'fastly',
   'rapidseedbox',
   'dynanode',
-  'cherryservers',
+  'cherryservers'
+]
+
+const supportedCompanies = [
+  'datadog',
+  'github',
+  'terraform',
+  'circleci',
+  'zendesk',
+  'okta',
+  'grafana'
 ]
 
 let _store = {
@@ -101,6 +117,7 @@ let _store = {
 async function load(opts = {}) {
   const {
     providers = supportedProviders,
+    companies = supportedCompanies,
     ttlMs = _store.ttlMs,
     force = false,
   } = opts
@@ -110,6 +127,50 @@ async function load(opts = {}) {
     return { loadedAt: (_store.loadedAt), count: _store.records.length }
   }
 
+  const {byProvider, providerRecords} = await loadProviders(providers)
+  const {byCompany, companyRecords} = await loadCompanies(companies)
+  const records = [...providerRecords, ...companyRecords]
+
+  _store = {
+    loadedAt: Date.now(),
+    ttlMs,
+    records,
+    byCompany,
+    byProvider,
+  }
+
+  return { loadedAt: _store.loadedAt, count: _store.records.length }
+}
+
+async function loadCompanies (companies) {
+  const tasks = []
+  if (companies.includes('datadog')) tasks.push(getDataDog())
+  if (companies.includes('github')) tasks.push(getGitHub())
+  if (companies.includes('terraform')) tasks.push(getTerraform())
+  if (companies.includes('circleci')) tasks.push(getCircleCI())
+  if (companies.includes('zendesk')) tasks.push(getZendesk())
+  if (companies.includes('okta')) tasks.push(getOkta())
+  if (companies.includes('grafana')) tasks.push(getGrafana())
+
+  const results = await Promise.allSettled(tasks)
+  const raw = results
+      .filter(r => r.status === 'fulfilled')
+      .flatMap((r) => r.value || [])
+
+  const companyRecords = raw
+      .map(normalizeSaas)
+      .filter((record) => Boolean(record))
+
+  const byCompany = new Map()
+  for (const rec of companyRecords) {
+    const key = rec.provider
+    if (!byCompany.has(key)) byCompany.set(key, [])
+    byCompany.get(key).push(rec)
+  }
+  return {byCompany, companyRecords}
+}
+
+async function loadProviders (providers) {
   const tasks = []
   for (const id of providers) {
     if (gFeeds.has(id)) {
@@ -133,63 +194,90 @@ async function load(opts = {}) {
   const results = await Promise.allSettled(tasks)
 
   const raw = results
-    .filter(r => r.status === 'fulfilled')
-    .flatMap((r) => r.value || [])
+      .filter(r => r.status === 'fulfilled')
+      .flatMap((r) => r.value || [])
 
-  const records = raw
-    .map(normalizeRecord)
-    .filter((record) => Boolean(record))
+  const providerRecords = raw
+      .map(normalizeClouds)
+      .filter((record) => Boolean(record))
 
   const byProvider = new Map()
-  for (const rec of records) {
+  for (const rec of providerRecords) {
     const key = rec.provider
     if (!byProvider.has(key)) byProvider.set(key, [])
     byProvider.get(key).push(rec)
   }
-
-  _store = {
-    loadedAt: Date.now(),
-    ttlMs,
-    records,
-    byProvider,
-  }
-
-  return { loadedAt: _store.loadedAt, count: _store.records.length }
+  return {byProvider, providerRecords}
 }
-
 /**
  * Check whether an IP belongs to any known cloud provider CIDR range.
  */
 function isIp(ip, options = {}) {
-  if (!Net.isIP(ip)) return { match: false, reason: 'invalid_ip' }
+  if (!isValid(ip)) return { match: false, reason: 'invalid_ip' }
   if (!_store.loadedAt) return {match: false, reason: 'data_not_loaded'}
+  ip = parse(ip)
 
   const { provider, service, regionId, country } = options
 
   let candidates = _store.records
   if (provider) {
-    const arr = _store.byProvider.get(provider)
+    const arr = _store.byProvider.get(provider) ?? _store.byCompany?.get(provider)
     if (!arr) return { match: false, reason: 'provider_not_loaded' }
     candidates = arr
   }
 
-  if (service) candidates = candidates.filter(r => r.service === service)
+  if (service) candidates = candidates.filter(r => Array.isArray(r.service) ? r.service.includes(service) : r.service === service)
   if (regionId) candidates = candidates.filter(r => r.regionId === regionId)
   if (country) candidates = candidates.filter(r => Array.isArray(country) ? country.includes(r.country) :  r.country === country)
-  for (const rec of candidates) {
-    for (const cidr of rec.addressesv4) {
-      if (ipInCidr(ip, cidr)) {
-        return { match: true, version: 'ipv4', provider: rec.provider, country: rec.country, regionId: rec.regionId,  region: rec.region, service: rec.service, cidr };
+  const matches = new Map()
+  for (const {addressesv4, addressesv6, ...recwoAddr} of candidates) {
+    for (const cidr of addressesv4) {
+      if (cidr[0].kind() === ip.kind() && ip.match(cidr)) {
+        const matchKey = `${recwoAddr.provider}_${recwoAddr?.country ?? null}_${recwoAddr?.regionId ?? null}`
+        const match = matches.get(matchKey)
+        if (match) {
+          if (Array.isArray(match.service) && Array.isArray(recwoAddr.service)) {
+            for (const service of recwoAddr.service) {
+              if (!match.service.includes(service)) match.service.push(service)
+            }
+          } else if (!match.service && Array.isArray(recwoAddr.service)) {
+            match.service = [...recwoAddr.service]
+          }
+        } else {
+          matches.set(matchKey,{version: cidr[0].kind(), ...recwoAddr, service: Array.isArray(recwoAddr.service) ? [...recwoAddr.service] : recwoAddr.service, cidr: `${cidr[0].toNormalizedString()}/${cidr[1]}`})
+        }
+
+        //matches.push({ version: 'ipv4', provider: rec.provider, country: rec.country, regionId: rec.regionId, region: rec.region, service: rec.service, cidr })
       }
     }
-    for (const cidr of rec.addressesv6) {
-      if (ipInCidr(ip, cidr)) {
-        return { match: true, version: 'ipv6', provider: rec.provider, country: rec.country, regionId: rec.regionId, region: rec.region, service: rec.service, cidr };
+    for (const cidr of addressesv6) {
+      if (cidr[0].kind() === ip.kind() && ip.match(cidr)) {
+        const matchKey = `${recwoAddr.provider}_${recwoAddr?.country ?? null}_${recwoAddr?.regionId ?? null}`
+        const match = matches.get(matchKey)
+        if (match) {
+          if (Array.isArray(match.service) && Array.isArray(recwoAddr.service)) {
+            for (const service of recwoAddr.service) {
+              if (!match.service.includes(service)) match.service.push(service)
+            }
+          } else if (!match.service && Array.isArray(recwoAddr.service)) {
+            match.service = [...recwoAddr.service]
+          }
+        } else {
+          matches.set(matchKey,{version: cidr[0].kind(), ...recwoAddr, service: Array.isArray(recwoAddr.service) ? [...recwoAddr.service] : recwoAddr.service, cidr: `${cidr[0].toNormalizedString()}/${cidr[1]}`})
+        }
+        //matches.push({ version: 'ipv6', provider: rec.provider, country: rec.country, regionId: rec.regionId, region: rec.region, service: rec.service, cidr })
       }
     }
   }
 
-  return { match: false }
+
+
+  if (matches.size > 0) {
+    return {match: true, matches: [...matches.values()]}
+  } else {
+    return { match: false }
+  }
+
 }
 
 /**
@@ -213,7 +301,11 @@ async function refresh() {
 }
 
 function exportData() {
-  return _store.records
+  return _store.records.map(({addressesv4, addressesv6, ...record}) => ({
+    ...record,
+    addressesv4: addressesv4.map(cidr => `${cidr[0].toNormalizedString()}/${cidr[1]}`),
+    addressesv6: addressesv6.map(cidr => `${cidr[0].toNormalizedString()}/${cidr[1]}`),
+  }))
 }
 
 module.exports = { load, isIp, getData, refresh, exportData }

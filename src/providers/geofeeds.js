@@ -1,4 +1,5 @@
 const papa = require('papaparse')
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 const gFeeds = new Map([
   ['elastx', { url: 'https://data-source.elastx.cloud/geofeed.csv', name: 'Elastx' }],
   ['hetzner', { url: 'https://www.hetzner.com/geofeed.csv', name: 'Hetzner' }],
@@ -54,15 +55,25 @@ const gFeeds = new Map([
   ['cherryservers', { url: 'https://geofeed.cherryservers.com/geofeed.csv', name: 'Cherry Servers' }],
 
 ])
+
+function normalizeRange(range) {
+  if (range.includes('/')) return range
+  if (range.includes('.')) return `${range}/32`
+  if (range.includes(':')) return `${range}/128`
+  return range
+}
+
 async function getGeofeed(id) {
   const ips = new Map()
+  const { url, name } = gFeeds.get(id) || {}
   try {
-    const { url, name } = gFeeds.get(id) || {}
-    const csv = await (await fetch(url, { maxRedirects: 10 })).text()
+    const res = await fetch(url, { maxRedirects: 10 })
+    if (res.status >= 400) throw new Error(`HTTP ${res.status}`)
+    const csv = await res.text()
     const rows = papa.parse(csv, { comments: '#' }).data
     for (const entry of rows) {
       if (entry[0] === 'ip_range' || entry[0] === 'network' || entry[0] === 'prefix') continue
-      const prefix = entry[0]
+      const prefix = normalizeRange(entry[0])
       const country = entry[1]
       const regionId = entry[2]
       const city = entry[3]
@@ -71,23 +82,24 @@ async function getGeofeed(id) {
 
       const key = `${country || ''}|${regionId || ''}|${region}`
       if (ips.has(key)) {
-        prefix.includes('.') ? ips.get(key).addressesv4.push(prefix) : ips.get(key).addressesv6.push(prefix)
+        prefix.includes('.') ? ips.get(key).addressesv4.push(parseCIDR(prefix)) : ips.get(key).addressesv6.push(parseCIDR(prefix))
       } else {
         const isAnycastRegion = region.toLowerCase() === 'anycast'
         const isAnycastCountry = country?.toLowerCase() === 'anycast'
         ips.set(key, {
-          cloud: name,
+          provider: name,
+          type:['cloud'],
           region: isAnycastRegion ? 'Global' : region,
           country: isAnycastCountry ? null : country,
           regionId: regionId?.toLowerCase() === 'anycast' ? 'global' : regionId || region,
           service: null,
-          addressesv4: prefix.includes('.') ? [prefix] : [],
-          addressesv6: prefix.includes(':') ? [prefix] : []
+          addressesv4: prefix.includes('.') ? [parseCIDR(prefix)] : [],
+          addressesv6: prefix.includes(':') ? [parseCIDR(prefix)] : []
         })
       }
     }
   } catch (error) {
-    console.error(`${error.message}`)
+    console.error(`${name}: ${error.message}`)
   }
   return Array.from(ips.values())
 }

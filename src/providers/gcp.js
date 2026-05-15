@@ -1,4 +1,5 @@
-  const regionMap = new Map([
+const {isValidCIDR, parseCIDR} = require('ipaddr.js')
+const regionMap = new Map([
     ['global',{region:'Global', country: null}],
     ['us-west1',{region:'Oregon', country: 'US'}],
     ['us-west2',{region:'Los Angeles', country: 'US'}],
@@ -56,17 +57,18 @@ module.exports = async function getGcp() {
         const json = await (await fetch('https://www.gstatic.com/ipranges/cloud.json', { maxRedirects: 10 })).json()
         for (const entry of json?.prefixes ?? []) {
             if (ips.has(entry.scope)) {
-                entry.ipv4Prefix ? ips.get(entry.scope).addressesv4.push(entry.ipv4Prefix) : null
-                entry.ipv6Prefix ? ips.get(entry.scope).addressesv6.push(entry.ipv6Prefix) : null
+                entry.ipv4Prefix ? ips.get(entry.scope).addressesv4.push(parseCIDR(entry.ipv4Prefix)) : null
+                entry.ipv6Prefix ? ips.get(entry.scope).addressesv6.push(parseCIDR(entry.ipv6Prefix)) : null
             } else {
                 ips.set(entry.scope, {
-                    cloud: 'Google',
+                    provider: 'Google',
+                    type:['cloud'],
                     region: regionMap.get(entry.scope)?.region || null,
                     country: regionMap.get(entry.scope)?.country || null,
                     regionId: entry.scope,
                     service: null,
-                    addressesv4: entry.ipv4Prefix ? [entry.ipv4Prefix] : [],
-                    addressesv6: entry.ipv6Prefix ? [entry.ipv6Prefix] : []
+                    addressesv4: entry.ipv4Prefix ? [parseCIDR(entry.ipv4Prefix)] : [],
+                    addressesv6: entry.ipv6Prefix ? [parseCIDR(entry.ipv6Prefix)] : []
                 })
             }
         }
