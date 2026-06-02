@@ -1,6 +1,6 @@
 {
   "name": "cloudscope",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A Node.js library to detect whether an IP address belongs to cloud, CDN, hosting, or SaaS/company ranges. Fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 addresses efficiently.",
   "keywords": [
     "ip",

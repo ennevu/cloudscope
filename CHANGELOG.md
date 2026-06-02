@@ -1,3 +1,26 @@
+## [0.3.1] - 2026-06-02
+
+### Added
+
+- Added cloud providers: Tenbyte, Terabix, ZettaGrid, and EdgeVana. Removed Cloud225 (does not seem to exist anymore)
+- Added SaaS/company datasets for Iterable, Intercom, Stripe, Fortanix, OpenAI, Perplexity, Auth0, Svix, Mailtrap, Nametag, Fal.ai, and Ahrefs.
+- Added `CompanyName` TypeScript type and expanded `CompanyId`/provider name declarations for the new SaaS/company datasets.
+
+### Changed
+
+- OpenAI and Perplexity records now keep `type: ['saas']` and expose `crawler` or `agent` through `service`.
+- Ahrefs single-IP crawler data is compacted into CIDR ranges before normalization.
+- Updated README provider/company coverage and examples for the expanded dataset.
+
+### Fixed
+
+- Azure no longer returns duplicate `global` matches when the same CIDR is also present in a localized regional record.
+- Fortanix and Intercom ranges are now consolidated into a single record when `type` and `service` are the same.
+
+### Removed
+
+- Removed Cloud225 from supported cloud providers.
+
 ## [0.3.0] - 2026-05-15
 
 ### Added

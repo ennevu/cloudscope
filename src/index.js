@@ -21,6 +21,18 @@ const getCircleCI = require('./providers/circleci.js')
 const getZendesk = require('./providers/zendesk.js')
 const getOkta = require('./providers/okta.js')
 const getGrafana = require('./providers/grafana.js')
+const getIterable = require('./providers/iterable.js')
+const getIntercom = require('./providers/intercom.js')
+const getStripe = require('./providers/stripe.js')
+const getFortanix = require('./providers/fortanix.js')
+const getOpenAI = require('./providers/openai.js')
+const getPerplexity = require('./providers/perplexity.js')
+const getAuth0 = require('./providers/auth0.js')
+const getSvix = require('./providers/svix.js')
+const getMailtrap = require('./providers/mailtrap.js')
+const getNametag = require('./providers/nametag.js')
+const getFalAI = require('./providers/falai.js')
+const getAhrefs = require('./providers/ahrefs.js')
 const { getGeofeed, gFeeds} = require('./providers/geofeeds.js')
 
 const supportedProviders = [
@@ -71,7 +83,6 @@ const supportedProviders = [
   'c1vhosting',
   '3hcloud',
   'cloudzy',
-  'cloud225',
   'cloudnet',
   'sejacloud',
   'letscloud',
@@ -89,7 +100,11 @@ const supportedProviders = [
   'fastly',
   'rapidseedbox',
   'dynanode',
-  'cherryservers'
+  'cherryservers',
+  'tenbyte',
+  'terabix',
+  'zettagrid',
+  'edgevana'
 ]
 
 const supportedCompanies = [
@@ -99,7 +114,19 @@ const supportedCompanies = [
   'circleci',
   'zendesk',
   'okta',
-  'grafana'
+  'grafana',
+  'iterable',
+  'intercom',
+  'stripe',
+  'fortanix',
+  'openai',
+  'perplexity',
+  'auth0',
+  'svix',
+  'mailtrap',
+  'nametag',
+  'falai',
+  'ahrefs'
 ]
 
 let _store = {
@@ -151,6 +178,18 @@ async function loadCompanies (companies) {
   if (companies.includes('zendesk')) tasks.push(getZendesk())
   if (companies.includes('okta')) tasks.push(getOkta())
   if (companies.includes('grafana')) tasks.push(getGrafana())
+  if (companies.includes('iterable')) tasks.push(getIterable())
+  if (companies.includes('intercom')) tasks.push(getIntercom())
+  if (companies.includes('stripe')) tasks.push(getStripe())
+  if (companies.includes('fortanix')) tasks.push(getFortanix())
+  if (companies.includes('openai')) tasks.push(getOpenAI())
+  if (companies.includes('perplexity')) tasks.push(getPerplexity())
+  if (companies.includes('auth0')) tasks.push(getAuth0())
+  if (companies.includes('svix')) tasks.push(getSvix())
+  if (companies.includes('mailtrap')) tasks.push(getMailtrap())
+  if (companies.includes('nametag')) tasks.push(getNametag())
+  if (companies.includes('falai')) tasks.push(getFalAI())
+  if (companies.includes('ahrefs')) tasks.push(getAhrefs())
 
   const results = await Promise.allSettled(tasks)
   const raw = results

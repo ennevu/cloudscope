@@ -97,7 +97,21 @@ module.exports = async function getAzure() {
         }
         const downloadUrl = downloadLinkElement.attr('href')
         const json = await (await fetch(downloadUrl, { maxRedirects: 10 })).json()
+        const localizedPrefixes = new Set()
         for (const entry of json?.values ?? []) {
+            const region = entry.properties.region
+            if (region && region !== 'global') {
+                for (const cidr of entry.properties.addressPrefixes ?? []) {
+                    if (isValidCIDR(cidr)) localizedPrefixes.add(cidr)
+                }
+            }
+        }
+        for (const entry of json?.values ?? []) {
+            const region = entry.properties.region
+            const addressPrefixes = (entry.properties.addressPrefixes ?? [])
+                .filter(cidr => isValidCIDR(cidr))
+                .filter(cidr => region && region !== 'global' ? true : !localizedPrefixes.has(cidr))
+            if (addressPrefixes.length === 0) continue
             ips.set(`${entry.properties.region}_${entry.properties.systemService}`, {
                 provider: entry.properties.platform,
                 type: ['cloud'],
@@ -105,8 +119,8 @@ module.exports = async function getAzure() {
                 region: regionMap.get(entry.properties.region)?.region || null,
                 country: regionMap.get(entry.properties.region)?.country || null,
                 service: entry.properties.systemService && entry.properties.systemService.length > 0 ? [entry.properties.systemService] : null,
-                addressesv4: entry.properties.addressPrefixes.filter(cidr => cidr.includes('.') && isValidCIDR(cidr)).map(cidr => parseCIDR(cidr)),
-                addressesv6: entry.properties.addressPrefixes.filter(cidr => cidr.includes(':') && isValidCIDR(cidr)).map(cidr => parseCIDR(cidr))
+                addressesv4: addressPrefixes.filter(cidr => cidr.includes('.')).map(cidr => parseCIDR(cidr)),
+                addressesv6: addressPrefixes.filter(cidr => cidr.includes(':')).map(cidr => parseCIDR(cidr))
             })
         }   
     } catch (error) {

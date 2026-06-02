@@ -34,7 +34,6 @@ const gFeeds = new Map([
   ['c1vhosting', { url: 'https://www.c1vhosting.it/geofeed.csv', name: 'C1V Hosting' }],
   ['3hcloud', { url: 'http://geofeed.3hcloud.com/geofeed.csv', name: '3H Cloud' }],
   ['cloudzy', { url: 'https://api.cloudzy.com/geofeed.csv', name: 'Cloudzy' }],
-  ['cloud225', { url: 'https://cloud225.net/geofeed.csv', name: 'Cloud225' }],
   ['cloudnet', { url: 'https://cloudnet.ca/geofeed.txt', name: 'CloudNet' }],
   ['sejacloud', { url: 'http://sejacloud.com/geofeed.csv', name: 'Seja Cloud' }],
   ['letscloud', { url: 'https://geofeed.letscloud.io', name: 'Lets Cloud' }],
@@ -53,7 +52,10 @@ const gFeeds = new Map([
   ['rapidseedbox', { url: 'https://geofeed.rapidseedbox.com/geofeed.csv', name: 'RapidSeedbox' }],
   ['dynanode', { url: 'https://dynanode.io/geofeed.txt', name: 'DynaNode' }],
   ['cherryservers', { url: 'https://geofeed.cherryservers.com/geofeed.csv', name: 'Cherry Servers' }],
-
+  ['tenbyte', { url: 'https://tenbyte.io/geofeed.csv', name: 'Tenbyte' }],
+  ['terabix', { url: 'https://terabix.net/geofeed.csv', name: 'Terabix' }],
+  ['zettagrid', { url: 'https://www.zettagrid.com/geofeed.csv', name: 'ZettaGrid' }],
+  ['edgevana', { url: 'https://edgevana.com/geofeed.csv', name: 'EdgeVana' }],
 ])
 
 function normalizeRange(range) {

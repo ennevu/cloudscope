@@ -7,7 +7,7 @@
 **cloudscope** is a Node.js library to detect whether an IP address belongs to a cloud provider, CDN, hosting provider or supported SaaS/company range.
 It fetches and normalizes CIDR ranges, then lets you check IPv4 and IPv6 addresses efficiently.
 
-An IP can return multiple matches when it belongs to both the underlying infrastructure provider and the SaaS/company using that range.
+An IP can return multiple matches when it belongs to both a SaaS/company range and the underlying infrastructure provider, making it possible to infer which cloud provider that company is using.
 
 ---
 
@@ -23,23 +23,22 @@ An IP can return multiple matches when it belongs to both the underlying infrast
 
 ## Supported Providers
 
-| Country/Region      | Providers                                                                                   |
-|---------------------|---------------------------------------------------------------------------------------------|
-| USA                 | AWS, Azure, Google Cloud, IBM, DigitalOcean, Linode, Oracle, Vultr, Cloudflare, HostHatch, GTHost, Kamatera, Contabo, Railway, HostGlobal, HostBilby, MyCloud, MyMisaka, Serverside, LetsCloud, Cloudzy, SeasonCloud, RareCloud, HaloCloud, Mathost, MCHost, MClouds, PumpCloud, LowHosting, ZappieHost, CrownCloud, CloudNet, Axera, Fastly, DynaNode |
-| Asia                | Aliyun (China), KaopuCloud (China), JinXCloud (China), 62Yun, NIFCloud (Japan), Mikicloud (Japan)                                                              |
-| Europe              | Scaleway (France), Exoscale (Switzerland), Hetzner (Germany), Aruba (Italy), EuroHoster (Bulgaria), Seeweb (Italy), Timeweb (Russia), Gcore (Luxembourg), Datalix (Netherlands), 3HCloud (Russia), C1VHosting (Netherlands), Maikiwi (Netherlands), SejaCloud (Portugal), CloudComTR (Turkey), Akile (France), VeCloud (France), Hostealo (Spain), HostGlobal (Germany), MCHost (Russia), Mathost (Russia), MClouds (Russia), SeasonCloud (Russia), RareCloud (Russia), HaloCloud (Russia), CloudNet (Germany), Axera (France), CSTI (Switzerland), Hostealo (Spain), Hostinger, DedCloud, Cherry Servers, RapidSeedbox |
-| Australia           | HostBilby                                                                                   |
-| Brazil              | LetsCloud                                                                                   |
-| India               | HostGlobal                                                                                  |
-| Africa              | Cloud225 (Ivory Coast)                                                                      |
+| Country/Region | Providers |
+|----------------|-----------|
+| USA | AWS, Azure, Google Cloud, IBM, DigitalOcean, Linode, Oracle, Vultr, Cloudflare, HostHatch, GTHost, Kamatera, Contabo, Railway, HostGlobal, HostBilby, MyCloud, MyMisaka, Serverside, LetsCloud, Cloudzy, SeasonCloud, RareCloud, HaloCloud, Mathost, MCHost, MClouds, PumpCloud, LowHosting, ZappieHost, CrownCloud, CloudNet, Axera, Fastly, DynaNode, EdgeVana |
+| Asia | Aliyun (China), KaopuCloud (China), JinXCloud (China), 62Yun, NIFCloud (Japan), Mikicloud (Japan), Terabix (Malaysia), Tenbyte (Bangladesh) |
+| Europe | Scaleway (France), Exoscale (Switzerland), Hetzner (Germany), Aruba (Italy), EuroHoster (Bulgaria), Seeweb (Italy), Timeweb (Russia), Gcore (Luxembourg), Datalix (Netherlands), 3HCloud (Russia), C1VHosting (Netherlands), Maikiwi (Netherlands), SejaCloud (Portugal), CloudComTR (Turkey), Akile (France), VeCloud (France), Hostealo (Spain), HostGlobal (Germany), MCHost (Russia), Mathost (Russia), MClouds (Russia), SeasonCloud (Russia), RareCloud (Russia), HaloCloud (Russia), CloudNet (Germany), Axera (France), CSTI (Switzerland), Hostinger, DedCloud, Cherry Servers, RapidSeedbox |
+| Australia | HostBilby, ZettaGrid |
+| Brazil | LetsCloud |
+| India | HostGlobal |
 
 *Note: Some providers operate globally or in multiple regions. This table lists their primary country or region of origin where applicable.*
 
 ## Supported Companies
 
-| Scope               | Companies                                                                                   |
-|---------------------|---------------------------------------------------------------------------------------------|
-| Global              | DataDog, GitHub, Terraform, CircleCI, Zendesk, Okta, Grafana                                |
+| Scope | Companies |
+|-------|-----------|
+| Global | DataDog, GitHub, Terraform, CircleCI, Zendesk, Okta, Grafana, Iterable, Intercom, Stripe, Fortanix, OpenAI, Perplexity, Auth0, Svix, Mailtrap, Nametag, Fal.ai, Ahrefs |
 
 Companies are loaded with the `companies` option in `load()`.
 
@@ -171,7 +170,7 @@ Checks whether an IPv4 or IPv6 address belongs to a known provider or company ra
 * `ip` *(string)* → IP address to check
 * `options` *(IsIpOptions)* (optional)
 
-  * `provider` → restrict to a specific provider/company (e.g., "Amazon", "Microsoft", "DataDog")
+  * `provider` → restrict to a specific provider/company (e.g., "Amazon", "Microsoft", "DataDog", "OpenAI")
   * `service` → restrict to a specific service (if available)
   * `regionId` → restrict to a specific region identifier (e.g., "eu-west-1")
   * `country` → restrict to a specific country or a list of countries (e.g., "US" or ["US", "IT", "DE"])

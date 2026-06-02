@@ -48,7 +48,6 @@ export type ProviderId =
   | 'c1vhosting'
   | '3hcloud'
   | 'cloudzy'
-  | 'cloud225'
   | 'cloudnet'
   | 'sejacloud'
   | 'letscloud'
@@ -66,9 +65,53 @@ export type ProviderId =
   | 'fastly'
   | 'rapidseedbox'
   | 'dynanode'
-  | 'cherryservers';
+  | 'cherryservers'
+  | 'tenbyte'
+  | 'terabix'
+  | 'zettagrid'
+  | 'edgevana';
 
-export type CompanyId = 'datadog' | 'github' | 'terraform' | 'circleci' | 'zendesk' | 'okta' | 'grafana';
+export type CompanyId =
+  | 'datadog'
+  | 'github'
+  | 'terraform'
+  | 'circleci'
+  | 'zendesk'
+  | 'okta'
+  | 'grafana'
+  | 'iterable'
+  | 'intercom'
+  | 'stripe'
+  | 'fortanix'
+  | 'openai'
+  | 'perplexity'
+  | 'auth0'
+  | 'svix'
+  | 'mailtrap'
+  | 'nametag'
+  | 'falai'
+  | 'ahrefs';
+
+export type CompanyName =
+  | 'DataDog'
+  | 'GitHub'
+  | 'Terraform'
+  | 'CircleCI'
+  | 'Zendesk'
+  | 'Okta'
+  | 'Grafana'
+  | 'Iterable'
+  | 'Intercom'
+  | 'Stripe'
+  | 'Fortanix'
+  | 'OpenAI'
+  | 'Perplexity'
+  | 'Auth0'
+  | 'Svix'
+  | 'Mailtrap'
+  | 'Nametag'
+  | 'Fal.ai'
+  | 'Ahrefs';
 
 export type ProviderName =
   | 'Amazon'
@@ -118,7 +161,6 @@ export type ProviderName =
   | 'C1V Hosting'
   | '3H Cloud'
   | 'Cloudzy'
-  | 'Cloud225'
   | 'CloudNet'
   | 'Seja Cloud'
   | 'Lets Cloud'
@@ -137,13 +179,10 @@ export type ProviderName =
   | 'RapidSeedbox'
   | 'DynaNode'
   | 'Cherry Servers'
-  | 'DataDog'
-  | 'GitHub'
-  | 'Terraform'
-  | 'CircleCI'
-  | 'Zendesk'
-  | 'Okta'
-  | 'Grafana';
+  | 'Tenbyte'
+  | 'Terabix'
+  | 'ZettaGrid'
+  | 'EdgeVana';
 
 export type RecordType = 'cloud' | 'cdn' | 'saas' | string;
 
@@ -155,7 +194,7 @@ export type IPv6Cidr = [ipaddr.IPv6, number];
  */
 export interface NormalizedRecord {
   /** Provider or company name */
-  provider: ProviderName | string;
+  provider: ProviderName | CompanyName | string;
 
   /** Provider category */
   type: RecordType[];
@@ -209,7 +248,7 @@ export interface LoadOptions {
  */
 export interface IsIpOptions {
   /** Restrict to a specific provider */
-  provider?: ProviderName | string;
+  provider?: ProviderName | CompanyName | string;
 
   /** Restrict to a specific service */
   service?: string;
