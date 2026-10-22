@@ -10,7 +10,6 @@ const gFeeds = new Map([
   ['pumpcloud', { url: 'https://pumpcloud.net/ip.csv', name: 'PumpCloud' }],
   ['kaopucloud', { url: 'https://www.kaopucloud.com/geofeed.csv', name: 'Kaopu Cloud' }],
   ['cloudcomtr', { url: 'https://cloud.com.tr/geofeed/geofeed.csv', name: 'Cloud.com.tr' }],
-  ['crowncloud', { url: 'https://crowncloud.net/geofeed.csv', name: 'CrownCloud' }],
   ['mikicloud', { url: 'https://mikucloud.co/geofeed.csv', name: 'Miku Cloud' }],
   ['gthost', { url: 'https://lg-tor.gthost.com/geo-feed.csv', name: 'GT Host' }],
   ['lowhosting', { url: 'https://lowhosting.com/geofeed.csv', name: 'Low Hosting' }],
@@ -54,7 +53,6 @@ const gFeeds = new Map([
   ['cherryservers', { url: 'https://geofeed.cherryservers.com/geofeed.csv', name: 'Cherry Servers' }],
   ['tenbyte', { url: 'https://tenbyte.io/geofeed.csv', name: 'Tenbyte' }],
   ['terabix', { url: 'https://terabix.net/geofeed.csv', name: 'Terabix' }],
-  ['zettagrid', { url: 'https://www.zettagrid.com/geofeed.csv', name: 'ZettaGrid' }],
   ['edgevana', { url: 'https://edgevana.com/geofeed.csv', name: 'EdgeVana' }],
 ])
 
@@ -73,12 +71,16 @@ async function getGeofeed(id) {
     if (res.status >= 400) throw new Error(`HTTP ${res.status}`)
     const csv = await res.text()
     const rows = papa.parse(csv, { comments: '#' }).data
+    let invalidRows = 0
     for (const entry of rows) {
-      if (entry[0] === 'ip_range' || entry[0] === 'network' || entry[0] === 'prefix') continue
-      const prefix = normalizeRange(entry[0])
-      const country = entry[1]
-      const regionId = entry[2]
-      const city = entry[3]
+      const [range = '', country, regionId, city] = entry.map(value => value.trim())
+      if (['ip_range', 'network', 'prefix'].includes(range.toLowerCase())) continue
+      if (!range) continue
+      const prefix = normalizeRange(range)
+      if (!isValidCIDR(prefix)) {
+        invalidRows++
+        continue
+      }
       const region = city || regionId || country
       if (!prefix || !region) continue
 
@@ -100,6 +102,7 @@ async function getGeofeed(id) {
         })
       }
     }
+    if (invalidRows) console.error(`${name}: skipped ${invalidRows} invalid geofeed row(s)`)
   } catch (error) {
     console.error(`${name}: ${error.message}`)
   }

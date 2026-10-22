@@ -2,6 +2,13 @@ const cheerio = require('cheerio')
 const {isValidCIDR, parseCIDR} = require('ipaddr.js')
   const regionMap = new Map([
     ['global',{region:'Global', country: null}],
+    // Locations checked against Microsoft's geoloc-Microsoft.csv (2026-10-22).
+    ['indiasouthcentral',{region:'Hyderabad', country: 'IN'}],
+    ['northeastus5',{region:'Milwaukee', country: 'US'}],
+    ['southeastus5',{region:'Atlanta', country: 'US'}],
+    ['southwestus',{region:'Phoenix', country: 'US'}],
+    ['brazilne',{region:'Fortaleza', country: 'BR'}],
+    ['northeurope2',{region:'Helsinki', country: 'FI'}],
     ['australiacentral',{region:'Canberra', country: 'AU'}],
     ['australiacentral2',{region:'Canberra', country: 'AU'}],
     ['australiaeast',{region:'New South Wales', country: 'AU'}],

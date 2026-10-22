@@ -1,7 +1,7 @@
 const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 const regionMap = new Map([
     ['GLOBAL', {region:'Global', country: null}],
-    ['af-south-1',{region:'Cape Town', country: 'SA'}],
+    ['af-south-1',{region:'Cape Town', country: 'ZA'}],
     ['ca-central-1',{region:'Canada Central', country: 'CA'}],
     ['ca-west-1',{region:'Calgary', country: 'CA'}],
     ['us-west-1',{region:'N. California', country: 'US'}],

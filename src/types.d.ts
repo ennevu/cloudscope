@@ -24,7 +24,6 @@ export type ProviderId =
   | 'pumpcloud'
   | 'kaopucloud'
   | 'cloudcomtr'
-  | 'crowncloud'
   | 'mikicloud'
   | 'gthost'
   | 'lowhosting'
@@ -68,7 +67,6 @@ export type ProviderId =
   | 'cherryservers'
   | 'tenbyte'
   | 'terabix'
-  | 'zettagrid'
   | 'edgevana';
 
 export type CompanyId =
@@ -137,7 +135,6 @@ export type ProviderName =
   | 'PumpCloud'
   | 'Kaopu Cloud'
   | 'Cloud.com.tr'
-  | 'CrownCloud'
   | 'Miku Cloud'
   | 'GT Host'
   | 'Low Hosting'
@@ -181,7 +178,6 @@ export type ProviderName =
   | 'Cherry Servers'
   | 'Tenbyte'
   | 'Terabix'
-  | 'ZettaGrid'
   | 'EdgeVana';
 
 export type RecordType = 'cloud' | 'cdn' | 'saas' | string;

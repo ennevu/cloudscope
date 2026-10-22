@@ -1,5 +1,7 @@
 const {isValidCIDR, parseCIDR} = require('ipaddr.js')
 const regionMap = new Map([
+    ['es-mad-1',{region:'Madrid', country: 'ES'}],
+    ['it-mil-1',{region:'Milan', country: 'IT'}],
     ['de-fra-1',{region:'Frankfurt', country: 'DE'}],
     ['de-muc-1',{region:'Munich', country: 'DE'}],
     ['bg-sof-1',{region:'Sofia', country: 'BG'}],

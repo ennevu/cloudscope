@@ -44,18 +44,25 @@ function normalizeRange(range) {
 module.exports = async function getAliyun() {
   const ips = new Map()
   try {
-    const page = await (await fetch(
+    const response = await fetch(
       'https://www.alibabacloud.com/help/en/dts/user-guide/add-the-cidr-blocks-of-dts-servers-to-the-security-settings-of-on-premises-databases',
       { maxRedirects: 10 }
-    )).text()
+    )
+    if (response.status >= 400) throw new Error(`HTTP ${response.status}`)
+    const page = await response.text()
     const $ = cheerio.load(page)
-    const $tabs = $('h2, h3').filter((_, el) =>
-      $(el).text().trim() === 'Appendix: DTS server IP address ranges'
+    const sectionTitles = new Set([
+      'DTS CIDR blocks',
+      'Appendix: DTS server IP address ranges',
+      'Appendix: IP address CIDR blocks of DTS servers'
+    ])
+    const $tabs = $('h2, h3, h4').filter((_, el) =>
+      sectionTitles.has($(el).text().replace(/\s+/g, ' ').trim())
     ).first()
-    const $nodes = $('h2, h3, table').toArray()
+    const $nodes = $('h2, h3, h4, table').toArray()
     const startIdx = $nodes.findIndex(n => n === $tabs[0])
     if (startIdx === -1) {
-      return {}
+      throw new Error('DTS CIDR section not found in the page')
     }
 
     let currentRegionName = null
@@ -66,9 +73,9 @@ module.exports = async function getAliyun() {
       const tag = (el.tagName || '').toLowerCase()
       const text = $(el).text().trim()
 
-      if (tag === 'h2' && text === 'FAQ') { break }
+      if (/^h[234]$/.test(tag) && text === 'FAQ') { break }
 
-      if (tag === 'h2' || tag === 'h3') {
+      if (/^h[234]$/.test(tag)) {
         // These are section labels like "The Chinese mainland" and "Other regions".
         if (text && !text.startsWith('Appendix:')) {
           currentRegionName = text
@@ -110,6 +117,7 @@ module.exports = async function getAliyun() {
         const ranges = cidr.split(/[\s,]+/).map(s => s.trim()).filter(Boolean).map(normalizeRange)
         const addressesv4 = ranges.filter(r => r.includes('.') && isValidCIDR(r)).map(r => parseCIDR(r))
         const addressesv6 = ranges.filter(r => r.includes(':') && isValidCIDR(r)).map(r => parseCIDR(r))
+        if (addressesv4.length === 0 && addressesv6.length === 0) return
         const key = currentRegionIdInTable
 
         if (!ips.has(key)) {

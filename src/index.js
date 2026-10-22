@@ -1,350 +1,71 @@
-const {isValid, parse} = require('ipaddr.js')
-const { normalizeClouds, normalizeSaas } = require('./normalize')
-const getAws = require('./providers/aws')
-const getAzure = require('./providers/azure')
-const getGcp = require('./providers/gcp')
-const getIBM = require('./providers/ibm')
-const getOracle = require('./providers/oracle')
-const getDigitalOcean = require('./providers/digitalocean')
-const getLinode = require('./providers/linode')
-const getExoscale = require('./providers/exoscale')
-const getVultr = require('./providers/vultr')
-const getNifcloud = require('./providers/nifcloud')
-const getScaleway = require('./providers/scaleway')
-const getCloudflare = require('./providers/cloudflare.js')
-const getAliyun = require('./providers/aliyun.js')
-const getAruba = require('./providers/aruba.js')
-const getDataDog = require('./providers/datadog.js')
-const getGitHub = require('./providers/github.js')
-const getTerraform = require('./providers/terraform.js')
-const getCircleCI = require('./providers/circleci.js')
-const getZendesk = require('./providers/zendesk.js')
-const getOkta = require('./providers/okta.js')
-const getGrafana = require('./providers/grafana.js')
-const getIterable = require('./providers/iterable.js')
-const getIntercom = require('./providers/intercom.js')
-const getStripe = require('./providers/stripe.js')
-const getFortanix = require('./providers/fortanix.js')
-const getOpenAI = require('./providers/openai.js')
-const getPerplexity = require('./providers/perplexity.js')
-const getAuth0 = require('./providers/auth0.js')
-const getSvix = require('./providers/svix.js')
-const getMailtrap = require('./providers/mailtrap.js')
-const getNametag = require('./providers/nametag.js')
-const getFalAI = require('./providers/falai.js')
-const getAhrefs = require('./providers/ahrefs.js')
-const { getGeofeed, gFeeds} = require('./providers/geofeeds.js')
-
-const supportedProviders = [
-  'azure',
-  'aws',
-  'gcp',
-  'ibm',
-  'oracle',
-  'digitalocean',
-  'linode',
-  'exoscale',
-  'vultr',
-  'nifcloud',
-  'scaleway',
-  'cloudflare',
-  'aliyun',
-  'aruba',
-  'elastx',
-  'hetzner',
-  'eurohoster',
-  'hostealo',
-  'zappiehost',
-  'hosthatch',
-  'pumpcloud',
-  'kaopucloud',
-  'cloudcomtr',
-  'crowncloud',
-  'mikicloud',
-  'gthost',
-  'lowhosting',
-  'mathost',
-  'mchost',
-  'mclouds',
-  'halocloud',
-  'rarecloud',
-  'jinxcloud',
-  'xtom',
-  'akile',
-  'vecloud',
-  'hostbilby',
-  'hostglobal',
-  'kamatera',
-  'gcore',
-  'contabo',
-  'timeweb',
-  'seasoncloud',
-  'datalix',
-  'c1vhosting',
-  '3hcloud',
-  'cloudzy',
-  'cloudnet',
-  'sejacloud',
-  'letscloud',
-  'maikiwi',
-  'serverside',
-  'mycloud',
-  'mymisaka',
-  'railway',
-  'csti',
-  'seeweb',
-  'axera',
-  'hostinger',
-  '62yun',
-  'dedcloud',
-  'fastly',
-  'rapidseedbox',
-  'dynanode',
-  'cherryservers',
-  'tenbyte',
-  'terabix',
-  'zettagrid',
-  'edgevana'
-]
-
-const supportedCompanies = [
-  'datadog',
-  'github',
-  'terraform',
-  'circleci',
-  'zendesk',
-  'okta',
-  'grafana',
-  'iterable',
-  'intercom',
-  'stripe',
-  'fortanix',
-  'openai',
-  'perplexity',
-  'auth0',
-  'svix',
-  'mailtrap',
-  'nametag',
-  'falai',
-  'ahrefs'
-]
-
-let _store = {
-  loadedAt: null,
-  ttlMs: 1000 * 60 * 60 * 6, // 6 hours by default
-  records: [],
-  byProvider: new Map(),
+function createNode () {
+    return { children: [], entries: []}
 }
 
-/**
- * Download and normalize cloud provider IP ranges into memory.
- * - Uses an in-memory cache with a TTL.
- * - If data is fresh and `force` is not set, does nothing and returns a summary.
- */
-async function load(opts = {}) {
-  const {
-    providers = supportedProviders,
-    companies = supportedCompanies,
-    ttlMs = _store.ttlMs,
-    force = false,
-  } = opts
-
-  const isFresh = _store.loadedAt && (Date.now() - _store.loadedAt < _store.ttlMs)
-  if (isFresh && !force) {
-    return { loadedAt: (_store.loadedAt), count: _store.records.length }
-  }
-
-  const {byProvider, providerRecords} = await loadProviders(providers)
-  const {byCompany, companyRecords} = await loadCompanies(companies)
-  const records = [...providerRecords, ...companyRecords]
-
-  _store = {
-    loadedAt: Date.now(),
-    ttlMs,
-    records,
-    byCompany,
-    byProvider,
-  }
-
-  return { loadedAt: _store.loadedAt, count: _store.records.length }
-}
-
-async function loadCompanies (companies) {
-  const tasks = []
-  if (companies.includes('datadog')) tasks.push(getDataDog())
-  if (companies.includes('github')) tasks.push(getGitHub())
-  if (companies.includes('terraform')) tasks.push(getTerraform())
-  if (companies.includes('circleci')) tasks.push(getCircleCI())
-  if (companies.includes('zendesk')) tasks.push(getZendesk())
-  if (companies.includes('okta')) tasks.push(getOkta())
-  if (companies.includes('grafana')) tasks.push(getGrafana())
-  if (companies.includes('iterable')) tasks.push(getIterable())
-  if (companies.includes('intercom')) tasks.push(getIntercom())
-  if (companies.includes('stripe')) tasks.push(getStripe())
-  if (companies.includes('fortanix')) tasks.push(getFortanix())
-  if (companies.includes('openai')) tasks.push(getOpenAI())
-  if (companies.includes('perplexity')) tasks.push(getPerplexity())
-  if (companies.includes('auth0')) tasks.push(getAuth0())
-  if (companies.includes('svix')) tasks.push(getSvix())
-  if (companies.includes('mailtrap')) tasks.push(getMailtrap())
-  if (companies.includes('nametag')) tasks.push(getNametag())
-  if (companies.includes('falai')) tasks.push(getFalAI())
-  if (companies.includes('ahrefs')) tasks.push(getAhrefs())
-
-  const results = await Promise.allSettled(tasks)
-  const raw = results
-      .filter(r => r.status === 'fulfilled')
-      .flatMap((r) => r.value || [])
-
-  const companyRecords = raw
-      .map(normalizeSaas)
-      .filter((record) => Boolean(record))
-
-  const byCompany = new Map()
-  for (const rec of companyRecords) {
-    const key = rec.provider
-    if (!byCompany.has(key)) byCompany.set(key, [])
-    byCompany.get(key).push(rec)
-  }
-  return {byCompany, companyRecords}
-}
-
-async function loadProviders (providers) {
-  const tasks = []
-  for (const id of providers) {
-    if (gFeeds.has(id)) {
-      tasks.push(getGeofeed(id))
+function buildIndex (records) {
+    const roots = {
+        ipv4: createNode(),
+        ipv6: createNode()
     }
-  }
-  if (providers.includes('azure')) tasks.push(getAzure())
-  if (providers.includes('aws')) tasks.push(getAws())
-  if (providers.includes('gcp')) tasks.push(getGcp())
-  if (providers.includes('ibm')) tasks.push(getIBM())
-  if (providers.includes('oracle')) tasks.push(getOracle())
-  if (providers.includes('digitalocean')) tasks.push(getDigitalOcean())
-  if (providers.includes('linode')) tasks.push(getLinode())
-  if (providers.includes('exoscale')) tasks.push(getExoscale())
-  if (providers.includes('vultr')) tasks.push(getVultr())
-  if (providers.includes('nifcloud')) tasks.push(getNifcloud())
-  if (providers.includes('scaleway')) tasks.push(getScaleway())
-  if (providers.includes('cloudflare')) tasks.push(getCloudflare())
-  if (providers.includes('aliyun')) tasks.push(getAliyun())
-  if (providers.includes('aruba')) tasks.push(getAruba())
-  const results = await Promise.allSettled(tasks)
+    let order = 0
 
-  const raw = results
-      .filter(r => r.status === 'fulfilled')
-      .flatMap((r) => r.value || [])
+    for (const record of records) {
+        for (const field of ['addressesv4', 'addressesv6']) {
+            for (const cidr of record[field]) {
+                const [address, prefixLength] = cidr
+                const bytes = address.toByteArray()
 
-  const providerRecords = raw
-      .map(normalizeClouds)
-      .filter((record) => Boolean(record))
+                let node = roots[address.kind()]
+                for (let i = 0; i < prefixLength; i++) {
+                    const bit = (bytes[i >> 3] >> (7 - (i & 7))) & 1
+                    node.children[bit] ??= createNode()
+                    node = node.children[bit]
+                }
 
-  const byProvider = new Map()
-  for (const rec of providerRecords) {
-    const key = rec.provider
-    if (!byProvider.has(key)) byProvider.set(key, [])
-    byProvider.get(key).push(rec)
-  }
-  return {byProvider, providerRecords}
-}
-/**
- * Check whether an IP belongs to any known cloud provider CIDR range.
- */
-function isIp(ip, options = {}) {
-  if (!isValid(ip)) return { match: false, reason: 'invalid_ip' }
-  if (!_store.loadedAt) return {match: false, reason: 'data_not_loaded'}
-  ip = parse(ip)
-
-  const { provider, service, regionId, country } = options
-
-  let candidates = _store.records
-  if (provider) {
-    const arr = _store.byProvider.get(provider) ?? _store.byCompany?.get(provider)
-    if (!arr) return { match: false, reason: 'provider_not_loaded' }
-    candidates = arr
-  }
-
-  if (service) candidates = candidates.filter(r => Array.isArray(r.service) ? r.service.includes(service) : r.service === service)
-  if (regionId) candidates = candidates.filter(r => r.regionId === regionId)
-  if (country) candidates = candidates.filter(r => Array.isArray(country) ? country.includes(r.country) :  r.country === country)
-  const matches = new Map()
-  for (const {addressesv4, addressesv6, ...recwoAddr} of candidates) {
-    for (const cidr of addressesv4) {
-      if (cidr[0].kind() === ip.kind() && ip.match(cidr)) {
-        const matchKey = `${recwoAddr.provider}_${recwoAddr?.country ?? null}_${recwoAddr?.regionId ?? null}`
-        const match = matches.get(matchKey)
-        if (match) {
-          if (Array.isArray(match.service) && Array.isArray(recwoAddr.service)) {
-            for (const service of recwoAddr.service) {
-              if (!match.service.includes(service)) match.service.push(service)
+                node.entries.push({ record, field, cidr, order: order++ })
             }
-          } else if (!match.service && Array.isArray(recwoAddr.service)) {
-            match.service = [...recwoAddr.service]
-          }
-        } else {
-          matches.set(matchKey,{version: cidr[0].kind(), ...recwoAddr, service: Array.isArray(recwoAddr.service) ? [...recwoAddr.service] : recwoAddr.service, cidr: `${cidr[0].toNormalizedString()}/${cidr[1]}`})
+        }
+    }
+    return roots
+}
+
+function findCandidates (index, address, allowedRecords) {
+    const bytes = address.toByteArray()
+    let node = index[address.kind()]
+    const entries = [...node.entries]
+
+    for (let i = 0; i < bytes.length * 8; i++) {
+        const bit = (bytes[i >> 3] >> (7 - (i & 7))) & 1
+        node = node.children[bit]
+
+        if (!node) break
+
+        entries.push(...node.entries)
+    }
+
+    entries.sort((a, b) => a.order - b.order)
+
+    const allowed = allowedRecords ? new Set(allowedRecords) : null
+    const candidates = new Map()
+
+    for (const { record, field, cidr } of entries) {
+        if (allowed && !allowed.has(record)) continue
+
+        let candidate = candidates.get(record)
+
+        if (!candidate) {
+            candidate = {
+                ...record,
+                addressesv4: [],
+                addressesv6: []
+            }
+            candidates.set(record, candidate)
         }
 
-        //matches.push({ version: 'ipv4', provider: rec.provider, country: rec.country, regionId: rec.regionId, region: rec.region, service: rec.service, cidr })
-      }
+        candidate[field].push(cidr)
     }
-    for (const cidr of addressesv6) {
-      if (cidr[0].kind() === ip.kind() && ip.match(cidr)) {
-        const matchKey = `${recwoAddr.provider}_${recwoAddr?.country ?? null}_${recwoAddr?.regionId ?? null}`
-        const match = matches.get(matchKey)
-        if (match) {
-          if (Array.isArray(match.service) && Array.isArray(recwoAddr.service)) {
-            for (const service of recwoAddr.service) {
-              if (!match.service.includes(service)) match.service.push(service)
-            }
-          } else if (!match.service && Array.isArray(recwoAddr.service)) {
-            match.service = [...recwoAddr.service]
-          }
-        } else {
-          matches.set(matchKey,{version: cidr[0].kind(), ...recwoAddr, service: Array.isArray(recwoAddr.service) ? [...recwoAddr.service] : recwoAddr.service, cidr: `${cidr[0].toNormalizedString()}/${cidr[1]}`})
-        }
-        //matches.push({ version: 'ipv6', provider: rec.provider, country: rec.country, regionId: rec.regionId, region: rec.region, service: rec.service, cidr })
-      }
-    }
-  }
 
-
-
-  if (matches.size > 0) {
-    return {match: true, matches: [...matches.values()]}
-  } else {
-    return { match: false }
-  }
-
+    return [...candidates.values()]
 }
 
-/**
- * Get a lightweight summary of the current in-memory dataset.
- */
-function getData() {
-
-  return {
-    loadedAt: _store.loadedAt,
-    ttlMs: _store.ttlMs,
-    count: _store.records.length,
-    providers: Array.from(_store.byProvider.keys()),
-  }
-}
-
-/**
- * Force a refresh, ignoring cache freshness.
- */
-async function refresh() {
-  return load({ force: true })
-}
-
-function exportData() {
-  return _store.records.map(({addressesv4, addressesv6, ...record}) => ({
-    ...record,
-    addressesv4: addressesv4.map(cidr => `${cidr[0].toNormalizedString()}/${cidr[1]}`),
-    addressesv6: addressesv6.map(cidr => `${cidr[0].toNormalizedString()}/${cidr[1]}`),
-  }))
-}
-
-module.exports = { load, isIp, getData, refresh, exportData }
+module.exports = { buildIndex, findCandidates }

@@ -1,3 +1,20 @@
+## [0.3.2] - 2026-10-22
+
+### Changed
+
+- Replaced linear CIDR scans with separate IPv4 and IPv6 prefix indexes, keeping lookup time largely stable as the dataset grows.
+- Updated the README performance table with `0.3.2` results and a full-dataset comparison.
+
+### Fixed
+
+- Completed missing Azure, Oracle and Exoscale region/country mappings and corrected AWS Cape Town to `ZA`.
+- Restored Aliyun DTS range loading after the documentation section title changed; missing sections and HTTP errors are now reported.
+- Invalid geofeed rows are now skipped with a warning so subsequent valid ranges are still loaded, including those previously lost from KaopuCloud.
+
+### Removed
+
+- Removed CrownCloud and ZettaGrid from supported providers, TypeScript declarations, and documentation because their geofeed URLs return HTTP 404.
+
 ## [0.3.1] - 2026-06-02
 
 ### Added

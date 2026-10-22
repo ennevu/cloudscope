@@ -1,10 +1,30 @@
-const { test, before } = require('node:test');
+const { test, before, after, mock } = require('node:test');
 const assert = require('node:assert');
-const { load, isIp, getData } = require('../src/index.js');
+const { load, isIp, getData } = require('..');
 
 before(async () => {
+  // Fixed upstream responses keep the API tests independent of network changes.
+  mock.method(globalThis, 'fetch', async (url) => {
+    if (url === 'https://ip-ranges.amazonaws.com/ip-ranges.json') {
+      return { json: async () => ({
+        prefixes: [
+          { ip_prefix: '15.230.39.0/24', region: 'us-east-2', service: 'AMAZON' },
+          { ip_prefix: '13.244.85.0/24', region: 'af-south-1', service: 'AMAZON' }
+        ],
+        ipv6_prefixes: []
+      }) };
+    }
+    if (url === 'https://ip-ranges.datadoghq.com/') {
+      return { json: async () => ({
+        agents: { prefixes_ipv4: ['13.244.85.86/32'], prefixes_ipv6: [] }
+      }) };
+    }
+    throw new Error(`Unexpected fetch: ${url}`);
+  });
   await load({ providers: ['aws'], companies: ['datadog'] });
 });
+
+after(() => mock.restoreAll());
 
 test('detect known cloud IP', () => {
   const result = isIp('15.230.39.1').match;

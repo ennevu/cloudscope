@@ -25,10 +25,10 @@ An IP can return multiple matches when it belongs to both a SaaS/company range a
 
 | Country/Region | Providers |
 |----------------|-----------|
-| USA | AWS, Azure, Google Cloud, IBM, DigitalOcean, Linode, Oracle, Vultr, Cloudflare, HostHatch, GTHost, Kamatera, Contabo, Railway, HostGlobal, HostBilby, MyCloud, MyMisaka, Serverside, LetsCloud, Cloudzy, SeasonCloud, RareCloud, HaloCloud, Mathost, MCHost, MClouds, PumpCloud, LowHosting, ZappieHost, CrownCloud, CloudNet, Axera, Fastly, DynaNode, EdgeVana |
+| USA | AWS, Azure, Google Cloud, IBM, DigitalOcean, Linode, Oracle, Vultr, Cloudflare, HostHatch, GTHost, Kamatera, Contabo, Railway, HostGlobal, HostBilby, MyCloud, MyMisaka, Serverside, LetsCloud, Cloudzy, SeasonCloud, RareCloud, HaloCloud, Mathost, MCHost, MClouds, PumpCloud, LowHosting, ZappieHost, CloudNet, Axera, Fastly, DynaNode, EdgeVana |
 | Asia | Aliyun (China), KaopuCloud (China), JinXCloud (China), 62Yun, NIFCloud (Japan), Mikicloud (Japan), Terabix (Malaysia), Tenbyte (Bangladesh) |
 | Europe | Scaleway (France), Exoscale (Switzerland), Hetzner (Germany), Aruba (Italy), EuroHoster (Bulgaria), Seeweb (Italy), Timeweb (Russia), Gcore (Luxembourg), Datalix (Netherlands), 3HCloud (Russia), C1VHosting (Netherlands), Maikiwi (Netherlands), SejaCloud (Portugal), CloudComTR (Turkey), Akile (France), VeCloud (France), Hostealo (Spain), HostGlobal (Germany), MCHost (Russia), Mathost (Russia), MClouds (Russia), SeasonCloud (Russia), RareCloud (Russia), HaloCloud (Russia), CloudNet (Germany), Axera (France), CSTI (Switzerland), Hostinger, DedCloud, Cherry Servers, RapidSeedbox |
-| Australia | HostBilby, ZettaGrid |
+| Australia | HostBilby |
 | Brazil | LetsCloud |
 | India | HostGlobal |
 
@@ -74,16 +74,17 @@ result.matches[0].cidr
 
 ### Lookup performance
 
-Version `0.3.x` parses CIDR ranges once during loading with `ipaddr.js` and reuses those parsed ranges during IP checks. Version `0.2.x` parsed CIDRs during each lookup.
+Version `0.3.x` parses CIDR ranges once during loading; version `0.3.2` also builds an index for lookups.
 
-Local benchmark: 1000 generated IP checks against Cloudflare.
+Local benchmark: 1,000 generated IPv4 checks, excluding data loading.
 
-| Version | Total time | Time / IP checked |
-|---------|------------|-------------------|
-| `0.2.4` | 218.68 ms  | 0.2187 ms/IP      |
-| `0.3.x` | 2.31 ms    | 0.0023 ms/IP      |
+| Version | Total time (Cloudflare) | Time / IP checked | Total time (full dataset) | Time / IP checked (full dataset) |
+|---------|------------------------|-------------------|--------------------------|----------------------|
+| `0.2.4` (historical) | 218.68 ms | 0.2187 ms/IP | — | — |
+| `0.3.1` (linear scan) | 1.32 ms | 0.0013 ms/IP | 6,740.34 ms | 6.7403 ms/IP |
+| `0.3.2` (indexed) | 1.24 ms | 0.0012 ms/IP | 2.45 ms | 0.0025 ms/IP |
 
-This benchmark showed a 98.94% reduction in lookup time.
+The advantage becomes much greater on a larger dataset: with 301,781 CIDR entries from 84 sources, the index reduced lookup time from about 6.74 seconds to 2.45 ms, roughly **2,747× faster**. Lookup time stays largely stable as the dataset grows because the index follows the IP address bits instead of scanning every CIDR; the remaining work depends on how many prefixes match.
 
 ---
 
